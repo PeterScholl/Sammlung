@@ -7,6 +7,7 @@
     }
   }
   $db = new MyDB();
+  // increased Timeout because of waiting for interfering sqlite-actions
   $db->busyTimeout(5000);
   $db->exec("PRAGMA busy_timeout=5000");
   
