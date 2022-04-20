@@ -14,7 +14,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Family-Food-Control</title>
+  <title>Sammlungsverwaltung</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -64,9 +64,9 @@
       console_log( "Opened database successfully");
    }
 
-   //Client registrieren
+   //Client registrieren - Login durchfuehren
     if (!changeToClientID($_SESSION["clientid"])) { //war nicht schon registriert
-      if (!setClientIDUndInselTyp()) { //Registrierung fehlgeschlagen
+      if (!setClientIDUndUser()) { //Registrierung fehlgeschlagen
         $message_err = "Client konnte nicht angemeldet werden, evtl. maximale Anzahl (".MAXCLIENTS.") überschritten...";
       }
     }
@@ -94,7 +94,7 @@
   <div class="collapse navbar-collapse" id="collapsibleNavbar">
     <ul class="navbar-nav">
       <li class="nav-item">
-        <a class="nav-link" href="ffc.php">Home</a>
+        <a class="nav-link" href="<?php echo HOMEPAGE;?>">Home</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="admin.php">Admin</a>
@@ -104,7 +104,7 @@
       </li>          
     </ul>
   </div>  
-  <a class="navbar-brand ml-auto" href="#">Einkaufsliste</a><span class="badge badge-light"><?php echo 'Client-ID:'.$_SESSION["clientid"]; ?></span>
+  <a class="navbar-brand ml-auto" href="#">Sammlungsverwaltung</a><span class="badge badge-light"><?php echo 'Client-ID:'.$_SESSION["clientid"]; ?></span>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -171,7 +171,7 @@
 
       <!-- Modal Header -->
       <div class="modal-header">
-        <h4 class="modal-title">Information zu endliche Automaten mit Treasure Island</h4>
+        <h4 class="modal-title">Information zur Sammlungsverwaltung</h4>
         <button type="button" class="close" data-dismiss="modal">&times;</button>
       </div>
 

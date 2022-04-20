@@ -1,6 +1,6 @@
 <?php
 
-  define("DEBUG", false); //Konsolenausgaben aktivieren oder deaktivieren
+  define("DEBUG", true); //Konsolenausgaben aktivieren oder deaktivieren
   define("CHECKLIMITS", true); //sollen die Grenzwerte geprüft werden
   define("MAXTIME",90*60); //Maximale Zeit, die ein Client leben darf
   define("MAXCLIENTS", 100); //Maximal zulässige Anzahl von Clients

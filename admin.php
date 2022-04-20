@@ -175,14 +175,14 @@ EOF;
 <body>
 
 <nav class="navbar navbar-expand-sm bg-dark navbar-dark fixed-top">
-  <a class="navbar-brand" href="#">FamilyFoodControl</a>
+  <a class="navbar-brand" href="#">Sammlungstool - Administration</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
     <span class="navbar-toggler-icon"></span>
   </button>
   <div class="collapse navbar-collapse" id="collapsibleNavbar">
     <ul class="navbar-nav">
       <li class="nav-item">
-        <a class="nav-link" href="ffc.php">Home</a>
+        <a class="nav-link" href="<?php echo HOMEPAGE;?>">Home</a>
       </li>
     </ul>
   </div>  

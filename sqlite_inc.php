@@ -1,4 +1,8 @@
 <?php declare(strict_types=1); // strict requirement - Variablentypen werden geprüft!
+  //alle Datenbankoperationen sollten hier als Funktion deklariert sein, so dass man 
+  //diese für eine MySQL-Version austauschen könnte
+
+
   //Open the database
   //TODO-Fehler abfangen
   class MyDB extends SQLite3 {
@@ -11,6 +15,11 @@
   $db->busyTimeout(5000);
   $db->exec("PRAGMA busy_timeout=5000");
   
+  
+  // ---- ab hier folgen nur noch Funktionsdefinitionen ----
+  // ---- from here on only function-definitions -----------
+  
+  // -- get the IP-Adress of the client
   function getUserIpAddr(){
     //function is used for logging in Database or recognizing different users
     if(!empty($_SERVER['HTTP_CLIENT_IP'])){
@@ -26,6 +35,7 @@
   }
   
   //ein SQL-Statement ausführen und die Tabelle zurückliefern
+  //liefert manchmal limitierte Tabellen
   function getTableToSQL($sql) {
     // how to prevent code injection?!
     global $db;
@@ -65,11 +75,11 @@
     return $result->fetchArray(SQLITE3_ASSOC);
   }
   
-  //returns columnnames of a table as an Array
-  function getColumnNames($table) {
+  //returns columnnames of an SQL-table as an Array
+  function getColumnNames($tablename) {
     global $db;
     $colnames=[];
-    $sql = "PRAGMA table_info('".$table."');";
+    $sql = "PRAGMA table_info('".$tablename."');";
     console_log("SQL: ".$sql);
     $res=$db->query($sql);
     while ($row = $res->fetchArray(SQLITE3_ASSOC)) { // gefunden
@@ -126,49 +136,6 @@
       console_log("Unaccepted Values - key: ".$key." value ".$value);
     }
   }
-  
-  //alle Datenbankoperationen sollten hier als Funktion deklariert sein, so dass man 
-  //diese für eine MySQL-Version austauschen könnte
-  
-  function gibInselNr() {
-    global $db;
-    //Sollte eine Inselnummer ausgeben an der der größte Bedarf ist
-    $stmt = $db->prepare('SELECT count(*) AS anz FROM clients WHERE inseltyp=:inseltyp');
-    $anzahlen = array();
-    for ($i=1;$i<7;$i++) {
-      $stmt->bindValue(':inseltyp', "".$i, SQLITE3_TEXT);
-      $result = $stmt->execute();
-      $row = $result->fetchArray();
-      console_log("".$i.": ".$row["anz"]);
-      $anzahlen[$i]=$row["anz"];
-      //var_dump($result->fetchArray());
-    }
-    $min = min($anzahlen);
-    $inselnr = array_search($min,$anzahlen);
-    console_log("min: ".$min." fuer ".$inselnr);
-    //return rand(1,7);
-    return $inselnr;    
-  }
-  
-  function gibBildName($inseltyp) {
-    global $db;
-    if (!is_int($inseltyp)) {
-      return "schiff.jpg";
-    }
-    //Name des Bildes ermitteln
-    $sql = "select bilddatei from inseln where inselnr=".$inseltyp.";";
-    console_log("SQL: ".$sql);
-    $res=$db->query($sql);
-    if ($row = $res->fetchArray(SQLITE3_ASSOC)) { // gefunden
-      $bildname=$row['bilddatei'];
-      console_log("Bildname: ".$bildname);
-      return $bildname;
-    } else { // nicht gefunden
-      console_log("Bildname nicht gefunden?!");
-      //Mit unsinnigem Bild abgebrochen - sinnvoll?
-      return "schiff.jpg";
-    }
-  }
 
   //wechsel zu wunsch-Client-ID wenn möglich
   function changeToClientID($pref_id) {
@@ -178,7 +145,7 @@
     }
     console_log("Wechsel zu Wunsch-ID prüfen ".$pref_id);
     //Client in Datenbank suchen
-    $sql = "select rowid,inseltyp from clients where session_id='".session_id()."' AND rowid=".$pref_id.";";
+    $sql = "select rowid,user from clients where session_id='".session_id()."' AND rowid=".$pref_id.";";
     console_log("SQL: ".$sql);
     $res=$db->query($sql);
     if ($row = $res->fetchArray(SQLITE3_ASSOC)) { // gefunden
@@ -186,18 +153,18 @@
       console_log("SQL: ".$sql);
       $res=$db->exec($sql);
       $_SESSION["clientid"]=$row['rowid'];
-      $_SESSION["inseltyp"]=$row['inseltyp'];
-      console_log("clientid: ".$_SESSION["clientid"]." inseltyp: ".$_SESSION["inseltyp"]);
+      $_SESSION["user"]=$row['user'];
+      console_log("clientid: ".$_SESSION["clientid"]." user: ".$_SESSION["user"]);
       return true;
     }
     return false;
   }
   
-  function setClientIDUndInselTyp() {
+  function setClientIDUndUser() {
         global $db;
         console_log("Session-ID setzen und in Datenbank registrieren - Inseltyp bestimmen");
         //Client in Datenbank suchen
-        $sql = "select rowid,inseltyp from clients where session_id='".session_id()."';";
+        $sql = "select rowid,user from clients where session_id='".session_id()."';";
         console_log("SQL: ".$sql);
         $res=$db->query($sql);
         if ($row = $res->fetchArray(SQLITE3_ASSOC)) { // gefunden
@@ -205,8 +172,8 @@
           console_log("SQL: ".$sql);
           $res=$db->exec($sql);
           $_SESSION["clientid"]=$row['rowid'];
-          $_SESSION["inseltyp"]=$row['inseltyp'];
-          console_log("clientid: ".$_SESSION["clientid"]." inseltyp: ".$_SESSION["inseltyp"]);
+          $_SESSION["user"]=$row['user'];
+          console_log("clientid: ".$_SESSION["clientid"]." user: ".$_SESSION["user"]);
         } else { // nicht gefunden
           return generateExtraClientID();
         }
@@ -219,7 +186,7 @@
     global $db;
     console_log("Session-IDs für diese Session-ID auslesen");
     //Client in Datenbank suchen
-    $sql = "select rowid,inseltyp from clients where session_id='".session_id()."';";
+    $sql = "select rowid,user from clients where session_id='".session_id()."';";
     console_log("SQL: ".$sql);
     $res=$db->query($sql);
     while ($row = $res->fetchArray(SQLITE3_ASSOC)) { // gefunden
@@ -251,12 +218,12 @@
         }
       }
     }    
-    $_SESSION["inseltyp"]=gibInselNr();
-    $sql = "INSERT INTO clients (session_id, inseltyp, ipaddr, lastedited, created) VALUES ".
-    "('".session_id()."',".$_SESSION["inseltyp"].",'".getUserIpAddr()."',strftime('%Y-%m-%d %H:%M:%S','now'),strftime('%Y-%m-%d %H:%M:%S','now'));";
+    $_SESSION["user"]=-1; // Noch kein aktiver user
+    $sql = "INSERT INTO clients (session_id, user, ipaddr, lastedited, created) VALUES ".
+    "('".session_id()."',".$_SESSION["user"].",'".getUserIpAddr()."',strftime('%Y-%m-%d %H:%M:%S','now'),strftime('%Y-%m-%d %H:%M:%S','now'));";
     console_log("SQL: ".$sql);
     if($db->exec($sql)) {
-      console_log("Insel registriert");
+      console_log("Client registriert");
     } else {
       console_log("Eintrag nicht erfolgt");
       console_log("Fehler: ".$db->lastErrorMsg);
@@ -375,7 +342,7 @@
   
   function inselNrVonClientSetzen($clientid, $neueInselNr) {
     global $db;
-    $sql = "UPDATE clients set inseltyp='".$neueInselNr."', lastedited=strftime('%Y-%m-%d %H:%M:%S','now') where rowid='".$clientid."';";
+    $sql = "UPDATE clients set user='".$neueInselNr."', lastedited=strftime('%Y-%m-%d %H:%M:%S','now') where rowid='".$clientid."';";
     console_log("SQL: ".$sql);
     if($res=$db->exec($sql)) {
       console_log("Success");
@@ -431,6 +398,11 @@
   function doChecks() {
     global $db;
     // prüfen ob tabellen existieren
+    // user
+    checkTableExists("users","CREATE TABLE users (name TEXT, password TEXT, lastedited TEXT, created TEXT);");
+    // clients
+    checkTableExists("clients","CREATE TABLE clients (session_id TEXT, user INTEGER, ipaddr TEXT, lastedited TEXT, created TEXT);");
+    
     // shoppinglist
     checkTableExists("shoppinglist","CREATE TABLE shoppinglist (name TEXT, lastedited TEXT, created TEXT);");
     // article
@@ -438,19 +410,6 @@
     // SLcontainsArticle
     checkTableExists("SLcontainsArticle","CREATE TABLE SLcontainsArticle (slID INT, articleID INT, amount TEXT,unit TEXT, bought INT, byuserid INT, lastedited TEXT, created TEXT);");
     
-
-
-    // clients
-    if (is_null($db->querySingle("SELECT name FROM sqlite_master WHERE type='table' AND name='clients';"))) {
-      console_log("Tabelle clients existiert nicht!");
-      $sql = "CREATE TABLE clients (session_id TEXT, inseltyp INTEGER, ipaddr TEXT, lastedited TEXT, created TEXT);";
-      $ret = $db->exec($sql);
-      if(!$ret){
-          echo $db->lastErrorMsg();
-      } else {
-        console_log("Table clients created successfully");
-      }
-    }
     
     // piraten
     if (is_null($db->querySingle("SELECT name FROM sqlite_master WHERE type='table' AND name='piraten';"))) {
@@ -476,25 +435,20 @@
            $sql =<<<EOF
         INSERT INTO inseln (inselnr,name,bilddatei,zielA,zielB)
         VALUES (1, 'Pirates´ Island','pira.jpg', 2, 3 );
-
         INSERT INTO inseln (inselnr,name,bilddatei,zielA,zielB)
         VALUES (2, 'Shipwreck Bay','ship.jpg', 3, 4 );
-
         INSERT INTO inseln (inselnr,name,bilddatei,zielA,zielB)
         VALUES (3, 'Musket Hill','musk.jpg', 1, 5 );
-
         INSERT INTO inseln (inselnr,name,bilddatei,zielA,zielB)
         VALUES (4, 'Dead Man´s Island','dead.jpg', 3, 2 );
-
         INSERT INTO inseln (inselnr,name,bilddatei,zielA,zielB)
         VALUES (5, 'Mutineers´ Island','muti.jpg', 6, 4 );
-
         INSERT INTO inseln (inselnr,name,bilddatei,zielA,zielB)
         VALUES (6, 'Smugglers´ Cove','smug.jpg', 1, 7 );
-
         INSERT INTO inseln (inselnr,name,bilddatei,zielA,zielB)
         VALUES (7, 'Treasure Island','trea.jpg', -1, -1 );
-  EOF;
+EOF;
+  
        $ret = $db->exec($sql);
        if(!$ret) {
           echo $db->lastErrorMsg();
@@ -521,7 +475,7 @@
         VALUES ('allowToChangeIsland', 1,'allows a client to change the assigned island - needed if pupils cant change physical computers (Default: true)');
         INSERT INTO enable_options (name,value,description_optional)
         VALUES ('allowBordCardCreation', 1,'allows a pirate to create a bordcard himself (Default: true)');
-  EOF;
+EOF;
        $ret = $db->exec($sql);
        if(!$ret) {
           echo $db->lastErrorMsg();
