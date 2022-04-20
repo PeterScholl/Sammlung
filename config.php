@@ -7,5 +7,6 @@
   define("MAXCLIENTIDS", 6); //Maximal zulässige Anzahl von ClientIDs per Session
   define("MAXBK", 100); //Maximale Anzahl an Bordkarten
   define("ADMINPASS", "pass"); //Passwort für Adminseite
+  define("HOMEPAGE", "sammlung.php"); // Initial home-Page
   
 ?>

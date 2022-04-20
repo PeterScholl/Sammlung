@@ -33,7 +33,7 @@
         // Destroy the session.
         session_destroy();
         // Redirect to homepage
-        header("location: pirates.php");
+        header("location: ".HOMEPAGE);
         exit;
       }
     }
@@ -56,6 +56,7 @@
     
     // Processing get-data when form is submitted
     if($_SERVER["REQUEST_METHOD"] == "GET") {
+      //TODO: Tabellen für Sammlung eintragen
       if (isset($_GET["deleteSQLtables"])) {
         $sql =<<<EOF
       DROP TABLE inseln;
@@ -123,7 +124,7 @@ EOF;
       }
       if (isset($_GET["changerow"]) && isset($_GET["table"])) {
         //Änderung einer Tabellenzeile vorbereiten
-        console_log("GET-Befehl - Tabellenzeile ändern");
+        console_log("GET-Befehl - Tabellenzeile aendern");
         $show='changeTableRow';
         $rowToChange = getSingleTableRow((filter_input(INPUT_GET, 'table', FILTER_SANITIZE_STRING)),filter_input(INPUT_GET, 'changerow', FILTER_VALIDATE_INT));
         $tableToChange = (filter_input(INPUT_GET, 'table', FILTER_SANITIZE_STRING));
@@ -163,7 +164,7 @@ EOF;
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>FamilyFoodControl-Admin</title>
+  <title>Sammlungsverwaltungstool-Admin</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">

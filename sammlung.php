@@ -177,20 +177,7 @@
 
       <!-- Modal body -->
       <div class="modal-body">
-        Die Piraten haben eine Bordkarte mit einer Bordkartennummer und befinden sich auf Pirates' Island. Sobald sie im Hafen von
-        Pirates' Island ihre Bordkartennummer eingeben und diese als gültig erkannt wird, können Sie ein Schiff (A oder B) wählen,
-        mit dem sie zu einer bestimmten anderen Insel fahren. Dort geht die Reise dann weiter... <br>
-        Ziel ist es Treasure Island zu erreichen und den Schatz zu heben ;-)<br><br>
-        Zur Umsetzung soll auf mehreren Rechnern die Webseite gestartet werden - der Server vergibt automatisch die Inselnamen an
-        die Clients so dass von allen Inseln (insgesamt 6) in etwa gleich viele vorhanden sind. Idealerweise notieren sich die 
-        SchülerInnen (Piraten) auf einer (Bord-)Karte ihre Bordkartennummer, das jeweils gewählte Schiff und evtl. die jeweils 
-        aktuelle Insel, bis sie am Ziel Treasure Island angekommen sind.<br>
-        Vorlagen hierzu gibt es bei Computer-Science-Unplugged (von wo auch die Bilder stammen)<br>
-        Der/die Admin kann ggf. Bordkarten löschen, Clients löschen oder auch alle Tabellen zurücksetzen.<br>
-        Der Wechsel von Inseltyp oder mehreren Clients auf einem Rechner ist nur für den Sonderfall, dass z.B. nur wenige Rechner zur 
-        Verfügung stehen oder die SchülerInnen wegen einer Pandemie nicht durcheinander laufen dürfen, vorgesehen.<br><br>
-        Viel Spaß beim Reisen!<br><br>
-        PS: Als erstes brauchst du eine <a href="?neueBK">Bordkarte</a>!        
+        Diese Webseite soll dazu dienen eine Physiksammlung zu verwalten und Informationen zu möglichen Experimenten zu finden!        
       </div>
 
       <!-- Modal footer -->

@@ -12,6 +12,7 @@
   $db->exec("PRAGMA busy_timeout=5000");
   
   function getUserIpAddr(){
+    //function is used for logging in Database or recognizing different users
     if(!empty($_SERVER['HTTP_CLIENT_IP'])){
         //ip from share internet
         $ip = $_SERVER['HTTP_CLIENT_IP'];
