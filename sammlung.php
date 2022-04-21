@@ -48,11 +48,11 @@
     console_log("Session-ID: ".session_id());
     
     //Variablen anlegen und leer setzen
-    $bildname = "";
     $message_info = $message_err = "";
-    define("Z_SCHIFFSWAHL",2);
-    define("Z_BKEINGABE",1);
-    $zustand = Z_BKEINGABE;
+    // Zustände
+    define("Z_SHOWTHEMEN",2);  //Themenübersicht anzeigen
+    define("Z_SHOWOBJEKTELIST",1);
+    $zustand = Z_SHOWTHEMEN;
     
    //Open-and-prepare database
     require_once("sqlite_inc.php");
@@ -71,12 +71,14 @@
       }
     }
     
-
-   
- 
-    
     // Processing get-data when form is submitted
     if($_SERVER["REQUEST_METHOD"] == "GET") {
+      if (isset($_GET["show"])) { //hier soll die Ansicht ausgewählt werden
+        if($_GET["show"]==="themen") {
+          console_log("Themen werden angezeigt");
+          $zustand = Z_SHOWTHEMEN;
+        }        
+      }
       if (isset($_GET["neueBK"])) { //hier soll eine neue Bordkarte erzeugt werden
         if (isEnabled("allowBordCardCreation") && ($bknr = gibNeueBordkartenNummer())) {
           $message_info = "Neue Bordkarte mit der Nummer ".$bknr." erstellt - du befindest dich auf Pirates' Island";
@@ -97,6 +99,9 @@
         <a class="nav-link" href="<?php echo HOMEPAGE;?>">Home</a>
       </li>
       <li class="nav-item">
+        <a class="nav-link" href="<?php echo HOMEPAGE;?>?show=themen">Themen</a>
+      </li>    
+      <li class="nav-item">
         <a class="nav-link" href="admin.php">Admin</a>
       </li>    
       <li class="nav-item">
@@ -104,7 +109,14 @@
       </li>          
     </ul>
   </div>  
-  <a class="navbar-brand ml-auto" href="#">Sammlungsverwaltung</a><span class="badge badge-light"><?php echo 'Client-ID:'.$_SESSION["clientid"]; ?></span>
+  <a class="navbar-brand ml-auto" href="#">Sammlungsverwaltung</a><span class="badge badge-light"><?php echo 'Client-ID:'.$_SESSION["clientid"]; ?></span><br>
+  <?php
+    if ($_SESSION["user"]<1) {
+      echo '<a class="badge badge-light" data-toggle="modal" href="#loginModal">anmelden</a>';
+    } else {
+      
+    }
+  ?>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -124,8 +136,35 @@
   }
   ?>
   <div class="row">
-    <div class="col-sm-4 mx-auto">
-      <h5 id="slname">Einkaufsliste - Name</h5>
+    <div class="col-sm-8 mx-auto">
+      <?php
+      if ($zustand == Z_SHOWTHEMEN) {
+        echo '<h5 id="tblname">Themen&uuml;bersicht</h5>';
+        $name = "themenfelder";
+        $sql = "SELECT rowid,* FROM ".$name . ";";
+        if ($res = $db->query($sql)) {
+         echo "<div class=\"table-responsive\"><table class=\"table\"><thead><tr>\n";
+            for($i = 0; $i<$res->numColumns(); $i++) {
+              echo "<th>".$res->columnName($i)."</th>\n";			
+            }
+          echo "</tr></thead><tbody>\n";
+            while($row = $res->fetchArray(SQLITE3_NUM)) {
+              echo "<tr>";
+              for($i = 0; $i<$res->numColumns(); $i++) {
+                echo "<td>";
+                if ($i==0) {
+                  echo "<a href=\"?delrow=".$row[0]."&table=".$name."&showtables\" class=\"text-danger\" role=\"button\">&times;</a>";
+                  echo "<a href=\"?changerow=".$row[0]."&table=".$name."\">".$row[0]."</a></td>\n";
+                } else {
+                  echo $row[$i]."</td>\n";
+                }
+              }		
+              echo "</tr>\n";
+            }
+          echo "</tbody></table></div>\n";
+        }
+      } else {
+      ?>
         <p>
           <table id="sort" class="table table-striped">
             <thead>
@@ -148,11 +187,11 @@
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
         <button type="button" class="btn btn-primary" onclick="holeDaten()">Daten</button>
-        <button type="button" class="btn btn-primary" onclick="console.log(fccdaten.artikel);">Test</button>
         <button type="button" id="btnAdd" class="btn btn-primary" onclick="showAddForm()">Add</button>
         <button type="button" id="btnHideAdd" class="btn btn-primary" onclick="hideAddForm()" style="display:none">Hide Add</button>
       </form> 
       <hr class="d-sm-none">
+      <?php } ?>
     </div>
   </div>
 </div>
@@ -188,6 +227,26 @@
     </div>
   </div>
 </div>
+ <div id="loginModal" class="modal fade" role="dialog">  
+      <div class="modal-dialog">  
+   <!-- Modal content-->  
+           <div class="modal-content">  
+                <div class="modal-header">  
+                     <h4 class="modal-title">Login</h4>  
+                     <button type="button" class="close" data-dismiss="modal">&times;</button>  
+                </div>  
+                <div class="modal-body">  
+                     <label>Username</label>  
+                     <input type="text" name="username" id="username" class="form-control" />  
+                     <br />  
+                     <label>Password</label>  
+                     <input type="password" name="password" id="password" class="form-control" />  
+                     <br />  
+                     <button type="button" name="login_button" id="login_button" class="btn btn-warning">Login</button>  
+                </div>  
+           </div>  
+      </div>  
+ </div>  
 
 </body>
 </html>

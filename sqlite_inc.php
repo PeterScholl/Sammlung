@@ -403,60 +403,21 @@
     // clients
     checkTableExists("clients","CREATE TABLE clients (session_id TEXT, user INTEGER, ipaddr TEXT, lastedited TEXT, created TEXT);");
     
-    // shoppinglist
-    checkTableExists("shoppinglist","CREATE TABLE shoppinglist (name TEXT, lastedited TEXT, created TEXT);");
-    // article
-    checkTableExists("article","CREATE TABLE article (name TEXT, unit TEXT, permanent INT, byuserid INT, lastedited TEXT, created TEXT);");
-    // SLcontainsArticle
-    checkTableExists("SLcontainsArticle","CREATE TABLE SLcontainsArticle (slID INT, articleID INT, amount TEXT,unit TEXT, bought INT, byuserid INT, lastedited TEXT, created TEXT);");
+    // Themenbereiche
+    checkTableExists("themenfelder","CREATE TABLE themenfelder (bezeichnung TEXT, superthema INTEGER DEFAULT -1);");
+    // Objekt
+    checkTableExists("objekt","CREATE TABLE objekt (bezeichnung TEXT, anzahl INTEGER DEFAULT 1, ort INTEGER DEFAULT -1, bild TEXT DEFAULT NULL);");
+    // Schrank
+    checkTableExists("schrank","CREATE TABLE schrank (bezeichnung TEXT, raum TEXT);");
+    // Ort
+    checkTableExists("ort","CREATE TABLE ort (schrank INTEGER, fach INTEGER, bezeichnung TEXT DEFAULT '');");
+    // Datei
+    checkTableExists("datei","CREATE TABLE datei (bezeichnung TEXT, pfad TEXT);");
+    // Versuch
+    checkTableExists("versuch","CREATE TABLE versuch (bezeichnung TEXT);");
+    // VersuchContainsObjekt
+    checkTableExists("versuchCobjekt","CREATE TABLE versuchCobjekt (vid INTEGER, oid INTEGER, anzahl INTEGER);");
     
-    
-    // piraten
-    if (is_null($db->querySingle("SELECT name FROM sqlite_master WHERE type='table' AND name='piraten';"))) {
-      console_log("Tabelle piraten existiert nicht!");
-      $sql = "CREATE TABLE piraten (bordcardnr INT PRIMARY KEY, aktInsel INT, letzteInsel INT, tour TEXT, letzteFahrtZeit TEXT, erzeugt TEXT);";
-      $ret = $db->exec($sql);
-      if(!$ret){
-          echo $db->lastErrorMsg();
-      } else {
-        console_log("Table piraten created successfully");
-      }
-    }
-
-    // inseln
-    if (is_null($db->querySingle("SELECT name FROM sqlite_master WHERE type='table' AND name='inseln';"))) {
-      console_log("Tabelle inseln existiert nicht!");
-      $sql = "CREATE TABLE inseln (inselnr INT PRIMARY KEY, name TEXT, bilddatei TEXT, zielA INT, zielB INT);";
-      $ret = $db->exec($sql);
-      if(!$ret){
-          echo $db->lastErrorMsg();
-      } else {
-        console_log("Table inseln created successfully");
-           $sql =<<<EOF
-        INSERT INTO inseln (inselnr,name,bilddatei,zielA,zielB)
-        VALUES (1, 'Pirates´ Island','pira.jpg', 2, 3 );
-        INSERT INTO inseln (inselnr,name,bilddatei,zielA,zielB)
-        VALUES (2, 'Shipwreck Bay','ship.jpg', 3, 4 );
-        INSERT INTO inseln (inselnr,name,bilddatei,zielA,zielB)
-        VALUES (3, 'Musket Hill','musk.jpg', 1, 5 );
-        INSERT INTO inseln (inselnr,name,bilddatei,zielA,zielB)
-        VALUES (4, 'Dead Man´s Island','dead.jpg', 3, 2 );
-        INSERT INTO inseln (inselnr,name,bilddatei,zielA,zielB)
-        VALUES (5, 'Mutineers´ Island','muti.jpg', 6, 4 );
-        INSERT INTO inseln (inselnr,name,bilddatei,zielA,zielB)
-        VALUES (6, 'Smugglers´ Cove','smug.jpg', 1, 7 );
-        INSERT INTO inseln (inselnr,name,bilddatei,zielA,zielB)
-        VALUES (7, 'Treasure Island','trea.jpg', -1, -1 );
-EOF;
-  
-       $ret = $db->exec($sql);
-       if(!$ret) {
-          echo $db->lastErrorMsg();
-       } else {
-          console_log("Inseldaten eingetragen");
-       }
-      }
-    }
     
     // enableoptions -  0 is false - 1 is true
     if (is_null($db->querySingle("SELECT name FROM sqlite_master WHERE type='table' AND name='enable_options';"))) {
@@ -486,7 +447,9 @@ EOF;
     }
        
     //Limits prüfen
-    if (CHECKLIMITS) {
+    //diese Tabellen gibt es nicht mehr
+    //if (CHECKLIMITS) {
+    if (false) {
       // Alle Clients und Bordkarten löschen die älter als MAXTIME sind
       $sql = "DELETE FROM piraten where strftime('%s','now') - strftime('%s',erzeugt) > ".MAXTIME.";";
       console_log("SQL: ".$sql);

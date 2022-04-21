@@ -71,6 +71,28 @@ function holeArtikel() {
   console.log("Ajax-Daten da ?");  
 }
 
+function holeThemenfelder() {
+  console.log("Ajax-Anfrage Themenfelder holen");
+  var daten = {};
+  loadDocGet("ajaxjsondata.php?themenliste=1", function(xhttp) {
+    daten = JSON.parse(xhttp.responseText);
+    //console.log(JSON.stringify(daten));
+    let len = daten.length;
+    if (len>0) { // Vorschlagsliste leeren
+      $("#dl_articles").empty();
+    }
+    for (let i=0; i<len; i++) {
+      //Für Testzwecke schon mal einkaufsliste befüllen
+      //$("#sort tbody").append("<tr><td></td><td>"+daten[i].name+"</td><td></td><td></td><td></td></tr>");
+      //Vorschlagsliste befüllen
+      $("#dl_articles").append("<option value=\""+daten[i].name+"\">");
+    }
+    fccdaten.themenliste=daten;
+  }
+  )
+  console.log("Ajax-Daten da ?");
+}
+
 function holeArtikel_orig() {
   console.log("Ajax-Daten zu Artikeln holen");
   const xmlhttp = new XMLHttpRequest();
