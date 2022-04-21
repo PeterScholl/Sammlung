@@ -382,6 +382,8 @@
   }
     
   function checkTableExists($name,$createstmt) {
+    //checks if table $name exists and returns true
+    // if not - returns false and table will be created using createstmt
     //TODO: check if name and createstmt are alphanumeric and so on
     global $db;
     if (is_null($db->querySingle("SELECT name FROM sqlite_master WHERE type='table' AND name='".$name."';"))) {
@@ -392,7 +394,9 @@
       } else {
         console_log("Table ".$name." created successfully");
       }
+      return false;
     }
+    return true;
   }
 
   function doChecks() {
@@ -404,7 +408,20 @@
     checkTableExists("clients","CREATE TABLE clients (session_id TEXT, user INTEGER, ipaddr TEXT, lastedited TEXT, created TEXT);");
     
     // Themenbereiche
-    checkTableExists("themenfelder","CREATE TABLE themenfelder (bezeichnung TEXT, superthema INTEGER DEFAULT -1);");
+    if (!checkTableExists("themenfelder","CREATE TABLE themenfelder (bezeichnung TEXT, superthema INTEGER DEFAULT -1);")) {
+      //Tabelle wurde neu angelegt - Basisdaten einrichten
+           $sql =<<<EOF
+        INSERT INTO themenfelder (bezeichnung) VALUES ('Elektrizitätslehre');
+        INSERT INTO themenfelder (bezeichnung) VALUES ('Wärmelehre');
+        INSERT INTO themenfelder (bezeichnung,superthema) VALUES ('Stromkreis', (SELECT rowid from themenfelder WHERE bezeichnung='Elektrizitätslehre'));
+EOF;
+       $ret = $db->exec($sql);
+       if(!$ret) {
+          echo $db->lastErrorMsg();
+       } else {
+          console_log("Tabelle themenfelder mit Basisdaten bef&uuml;llt");
+       }
+    }
     // Objekt
     checkTableExists("objekt","CREATE TABLE objekt (bezeichnung TEXT, anzahl INTEGER DEFAULT 1, ort INTEGER DEFAULT -1, bild TEXT DEFAULT NULL);");
     // Schrank

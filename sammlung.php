@@ -77,6 +77,9 @@
         if($_GET["show"]==="themen") {
           console_log("Themen werden angezeigt");
           $zustand = Z_SHOWTHEMEN;
+        } else if($_GET["show"]==="objekte") {
+          console_log("Objekte werden angezeigt");
+          $zustand = Z_SHOWOBJEKTELIST;
         }        
       }
       if (isset($_GET["neueBK"])) { //hier soll eine neue Bordkarte erzeugt werden
@@ -100,6 +103,9 @@
       </li>
       <li class="nav-item">
         <a class="nav-link" href="<?php echo HOMEPAGE;?>?show=themen">Themen</a>
+      </li>    
+      <li class="nav-item">
+        <a class="nav-link" href="<?php echo HOMEPAGE;?>?show=objekte">Objekte</a>
       </li>    
       <li class="nav-item">
         <a class="nav-link" href="admin.php">Admin</a>
@@ -138,6 +144,8 @@
   <div class="row">
     <div class="col-sm-8 mx-auto">
       <?php
+      // Zustand Themen anzeigen
+      // Evtl. treeview ala https://www.w3schools.com/howto/howto_js_treeview.asp
       if ($zustand == Z_SHOWTHEMEN) {
         echo '<h5 id="tblname">Themen&uuml;bersicht</h5>';
         $name = "themenfelder";
@@ -163,7 +171,33 @@
             }
           echo "</tbody></table></div>\n";
         }
-      } else {
+      } else if ($zustand == Z_SHOWOBJEKTELIST) {
+        //Objekte anzeigen
+        echo '<h5 id="tblname">Objekt&uuml;bersicht</h5>';
+        $name = "objekte";
+        $sql = "SELECT rowid,* FROM ".$name . ";";
+        if ($res = $db->query($sql)) {
+         echo "<div class=\"table-responsive\"><table class=\"table\"><thead><tr>\n";
+            for($i = 0; $i<$res->numColumns(); $i++) {
+              echo "<th>".$res->columnName($i)."</th>\n";			
+            }
+          echo "</tr></thead><tbody>\n";
+            while($row = $res->fetchArray(SQLITE3_NUM)) {
+              echo "<tr>";
+              for($i = 0; $i<$res->numColumns(); $i++) {
+                echo "<td>";
+                if ($i==0) {
+                  echo "<a href=\"?delrow=".$row[0]."&table=".$name."&showtables\" class=\"text-danger\" role=\"button\">&times;</a>";
+                  echo "<a href=\"?changerow=".$row[0]."&table=".$name."\">".$row[0]."</a></td>\n";
+                } else {
+                  echo $row[$i]."</td>\n";
+                }
+              }		
+              echo "</tr>\n";
+            }
+          echo "</tbody></table></div>\n";
+        }
+      } else{
       ?>
         <p>
           <table id="sort" class="table table-striped">
