@@ -180,6 +180,28 @@
         return true;  
   }
   
+  //Benutzeranmeldedaten prüfen - gibt User-ID zurück (-1 wenn unbekannt)
+  function userIdZuAnmeldedaten($user,$pass) {
+    global $db;
+    console_log("Benutzer anmelden");
+    //User in Datenbank suchen
+    $stmt = $db->prepare("SELECT rowid FROM users WHERE name=:name AND password=:pass");
+    if ($stmt->bindValue(':name', $name, SQLITE3_TEXT) && $stmt->bindValue(':pass', $pass, SQLITE3_TEXT)) {
+      set_error_handler(function() { /* ignore errors */ });
+      console_log("  BindValues done");
+      if ($result = $stmt->execute()) { //erfolgreich
+        //console_log("  Statement executed: ".$stmt->getSQL(true));
+        if ($row = $result->fetchArray(SQLITE3_ASSOC) ) {
+          restore_error_handler();
+          console_log("  UserID: ".$row["rowid"]);
+          return $row["rowid"];
+        }
+      }
+      restore_error_handler();
+      return -1;
+    }
+  }
+  
   //gibt alle zulässigen Client-IDs als Array zu dieser Session-ID
   function getPossibleClientIDs() {
     $return = array();

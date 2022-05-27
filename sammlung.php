@@ -1,4 +1,5 @@
 <?php
+  /* Dies ist das Hauptprogramm mit dem Auswahlmenü und der Darstellung aller optionen */
   //debug-Optionen
   ini_set('display_errors', 1);
   ini_set('log_errors', 1);
@@ -46,6 +47,7 @@
     //console_log("Client-ID gelöscht: ".$_SESSION["clientid"]);
     //session_destroy();
     console_log("Session-ID: ".session_id());
+    console_log("PHP-Version: ".phpversion());
     
     //Variablen anlegen und leer setzen
     $message_info = $message_err = "";
@@ -90,6 +92,22 @@
         }
       } 
      }
+    // Processing post-data when form is submitted
+    // hier passiert auch ggf. eine Neuanmeldung
+    if($_SERVER["REQUEST_METHOD"] == "POST") {
+      console_log("Server-requestmethod ist POST");
+      console_log_json($_POST);
+      if (isset($_POST["login"])) { //Benutzer soll angemeldet werden
+        console_log("Anmeldeversuch");
+        if (isset($_POST["user"]) && isset($_POST["pass"])) { // Benutzername und Passwort wurden mitgeschickt
+          console_log("Jetzt (sollte) angemeldet werden");
+          userIdZuAnmeldedaten($_POST["user"],$_POST["pass"]);
+        } else { // Daten für die Anmeldung fehlerhaft
+          console_log("Anmeldeversuch fehlgeschlagen");
+          $message_err = "Anmeldung nicht m&ouml;glich - unzureichende Anmeldedaten";
+        }        
+      }
+    }
     
     
 ?>
@@ -270,13 +288,15 @@
                      <button type="button" class="close" data-dismiss="modal">&times;</button>  
                 </div>  
                 <div class="modal-body">  
-                     <label>Username</label>  
-                     <input type="text" name="username" id="username" class="form-control" />  
-                     <br />  
-                     <label>Password</label>  
-                     <input type="password" name="password" id="password" class="form-control" />  
-                     <br />  
-                     <button type="button" name="login_button" id="login_button" class="btn btn-warning">Login</button>  
+                  <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+                  <label>Username</label>  
+                  <input type="text" name="user" id="username" class="form-control" />  
+                  <br />  
+                  <label>Password</label>  
+                  <input type="password" name="pass" id="password" class="form-control" />  
+                  <br />  
+                  <input type="submit" name="login" id="login_button" class="btn btn-warning">
+                  </form>
                 </div>  
            </div>  
       </div>  
