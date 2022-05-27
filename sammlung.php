@@ -48,6 +48,7 @@
     //session_destroy();
     console_log("Session-ID: ".session_id());
     console_log("PHP-Version: ".phpversion());
+    console_log_json($_SESSION);
     
     //Variablen anlegen und leer setzen
     $message_info = $message_err = "";
@@ -101,7 +102,13 @@
         console_log("Anmeldeversuch");
         if (isset($_POST["user"]) && isset($_POST["pass"])) { // Benutzername und Passwort wurden mitgeschickt
           console_log("Jetzt (sollte) angemeldet werden");
-          userIdZuAnmeldedaten($_POST["user"],$_POST["pass"]);
+          $userid = userIdZuAnmeldedaten($_POST["user"],$_POST["pass"]);
+          if ($userid < 0) { // Fehler
+            $message_err = "Fehler bei der Anmeldung";
+            if ($userid == -3) $message_err = "Anmeldung nicht möglich - falsches Passwort";
+            if ($userid == -2) $message_err = "Anmeldung nicht möglich - unbekannter Nutzer";
+          }
+          $_SESSION["user"]=$userid;
         } else { // Daten für die Anmeldung fehlerhaft
           console_log("Anmeldeversuch fehlgeschlagen");
           $message_err = "Anmeldung nicht m&ouml;glich - unzureichende Anmeldedaten";
@@ -138,7 +145,8 @@
     if ($_SESSION["user"]<1) {
       echo '<a class="badge badge-light" data-toggle="modal" href="#loginModal">anmelden</a>';
     } else {
-      
+      echo '<a class="badge badge-light" data-toggle="modal" href="#logoffModal">'.$_SESSION["username"].'</a>';      
+      //TODO logoffModal fertig programmieren - Abmeldefunktion
     }
   ?>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
@@ -296,6 +304,22 @@
                   <input type="password" name="pass" id="password" class="form-control" />  
                   <br />  
                   <input type="submit" name="login" id="login_button" class="btn btn-warning">
+                  </form>
+                </div>  
+           </div>  
+      </div>  
+ </div>  
+ <div id="logoffModal" class="modal fade" role="dialog">  
+      <div class="modal-dialog">  
+   <!-- Modal content-->  
+           <div class="modal-content">  
+                <div class="modal-header">  
+                     <h4 class="modal-title">Logout</h4>  
+                     <button type="button" class="close" data-dismiss="modal">&times;</button>  
+                </div>  
+                <div class="modal-body">  
+                  <input type="submit" name="logout" id="logout_button" class="btn btn-warning">
+                  <input type="submit" name="abbrechen" id="cancel_button" class="btn btn-warning">
                   </form>
                 </div>  
            </div>  

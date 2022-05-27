@@ -72,8 +72,8 @@ EOF;
          }
       } else if (isset($_GET["showtables"])) {
         $show='tables';
-      } else if (isset($_GET["setbknr"])) {
-        $show='setbknr';
+      } else if (isset($_GET["setuserpass"])) {
+        $show='setuserpass';
       } else if (isset($_GET["options"])) {
         $show='options';
         if (isset($_GET["changerow"])) {
@@ -141,18 +141,10 @@ EOF;
      
     // Processing form data when form is submitted
     if($_SERVER["REQUEST_METHOD"] == "POST"){
-      if (isset($_POST["submitbordcardlist"]) && isset($_POST["bordcard_list"])) { //Bordcardnumbers are submitted
-        console_log("angekommen :-)");
-        $bknrstring = htmlspecialchars($_POST["bordcard_list"]);
-        $result = "Angelegte Bordkartennummern:";
-        $bknrarray = preg_split("/[\s,]+/",trim($bknrstring));
-        foreach ($bknrarray as $i) {
-          if (ctype_alnum($i)) { // $i besteht nur aus Zahlen
-            if (bordkartenNummerInDBEintragen($i) >=0 ) {
-              $result = $result." ".$i;
-            }
-          }
-        }
+      if (isset($_POST["submitnewpass"]) && isset($_POST["username"]) && isset($_POST["passwort"])) { //New password is submitted
+        console_log("Neues Passwort setzen");
+        //hier muss das Passwort neu gesetzt werden
+        setNewPassword($_POST["username"], $_POST["passwort"]);
         $show='tables';
       }        
     }
@@ -213,7 +205,7 @@ EOF;
           <a class="nav-link" href="?showtables">Tabellen anzeigen</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="?setbknr">Bordkarten erstellen</a>
+          <a class="nav-link" href="?setuserpass">Benutzerpasswort setzen</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="?options">Optionen</a>
@@ -335,19 +327,28 @@ EOF;
             </div>
         </form>
         <?php
-      } else if ($show=='setbknr') {
+      } else if ($show=='setuserpass') {
         ?>
-        <p>Erzeugen von individuellen Bordkartennummern, die an Sch&uuml;lerInnen herausgegeben werden k&ouml;nnen.<br>
-        30 Nummern sind als (immer gleiches) Beispiel vorgegeben und k&ouml;nnen nat&uuml;rlich ersetzt oder erg&auml;nzt werden.</p>
+        <p>Hier kann das Passwort eines Benutzers gesetzt werden</p>
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-          <label for="bordcard_list">Bordkarten-Nummern:</label>
-          <div class="form-group">
-            <textarea class="form-control" id="bordcard_list" name="bordcard_list" rows="3">1124,1131,1160,1204,1302,1318,1326,1380,1399,1407,1422,1456,
-1497,1512,1543,1577,1644,1656,1681,1731,1749,1756,1817,1875,
-1880,1894,1912,1945,1971,1986</textarea>
+          <div class="form-row">
+              <div class="col">
+                <label>Benutzername</label>
+              </div>
+              <div class="col">
+                <input type="text" name="username" value="hans">
+              </div>
           </div>
-          <div class="form-group">
-            <button class="btn btn-primary" type="submit" name="submitbordcardlist" id="submit">Senden</button>
+          <div class="form-row">
+              <div class="col">
+                <label>neues Passwort</label>
+              </div>
+              <div class="col">
+                <input type="text" name="passwort" value="pass">
+              </div>
+          </div>
+          <div class="form-row">
+            <button class="btn btn-primary" type="submit" name="submitnewpass" id="submit">Senden</button>
           </div>
         </form>
         <?php        

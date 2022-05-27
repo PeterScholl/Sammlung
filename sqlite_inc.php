@@ -153,7 +153,7 @@
       console_log("SQL: ".$sql);
       $res=$db->exec($sql);
       $_SESSION["clientid"]=$row['rowid'];
-      $_SESSION["user"]=$row['user'];
+      //$_SESSION["user"]=$row['user'];
       console_log("clientid: ".$_SESSION["clientid"]." user: ".$_SESSION["user"]);
       return true;
     }
@@ -172,7 +172,7 @@
           console_log("SQL: ".$sql);
           $res=$db->exec($sql);
           $_SESSION["clientid"]=$row['rowid'];
-          $_SESSION["user"]=$row['user'];
+          //$_SESSION["user"]=$row['user'];
           console_log("clientid: ".$_SESSION["clientid"]." user: ".$_SESSION["user"]);
         } else { // nicht gefunden
           return generateExtraClientID();
@@ -180,21 +180,30 @@
         return true;  
   }
   
-  //Benutzeranmeldedaten prüfen - gibt User-ID zurück (-1 wenn unbekannt)
+  //Benutzeranmeldedaten prüfen - gibt User-ID zurück (-2 wenn unbekannt, -3 wenn falsches Passwort, -1 bei sonstigen Fehlern)
   function userIdZuAnmeldedaten($user,$pass) {
     global $db;
     console_log("Benutzer anmelden");
     //User in Datenbank suchen
-    $stmt = $db->prepare("SELECT rowid FROM users WHERE name=:name AND password=:pass");
-    if ($stmt->bindValue(':name', $name, SQLITE3_TEXT) && $stmt->bindValue(':pass', $pass, SQLITE3_TEXT)) {
+    $stmt = $db->prepare("SELECT rowid,password FROM users WHERE name=:name");
+    if ($stmt->bindValue(':name', $user, SQLITE3_TEXT)) { //  && $stmt->bindValue(':pass', $pass, SQLITE3_TEXT)) {
       set_error_handler(function() { /* ignore errors */ });
       console_log("  BindValues done");
       if ($result = $stmt->execute()) { //erfolgreich
-        //console_log("  Statement executed: ".$stmt->getSQL(true));
+        console_log("  Statement executed: ".$stmt->getSQL(true));
         if ($row = $result->fetchArray(SQLITE3_ASSOC) ) {
           restore_error_handler();
-          console_log("  UserID: ".$row["rowid"]);
-          return $row["rowid"];
+          console_log("  Passwort prüfen ...");
+          if (password_verify($pass,$row["password"])) {
+            console_log("  success - UserID: ".$row["rowid"]);
+            $_SESSION["username"]=$user;
+            return $row["rowid"];
+          }
+          console_log("  Wrong password");
+          return -3;
+        } else {
+          console_log("  Unknown username: ".$user);
+          return -2;
         }
       }
       restore_error_handler();
@@ -372,6 +381,18 @@
     }
     return false; 
    }
+  
+  function setNewPassword($user, $pass) {
+    global $db;
+    console_log("Passwort setzen");
+    $stmt = $db->prepare('UPDATE users SET password=:value WHERE name=:username');
+    console_log("Anzahl Parameter in Statement: ".$stmt->paramCount());
+    $stmt->bindValue(':value', PASSWORD_HASH($pass, PASSWORD_DEFAULT), SQLITE3_TEXT);
+    $stmt->bindValue(':username', $user, SQLITE3_TEXT);
+    $result = $stmt->execute();
+    console_log_json($result);
+    // irgendwie auf Success prüfen?
+  }
   
   // gibt eine Array zum Piraten zurück, dass die Infos enthält
   // valid->true/false, aktInsel, letzteInsel, tour
