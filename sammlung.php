@@ -91,7 +91,13 @@
     if($_SERVER["REQUEST_METHOD"] == "POST") {
       console_log("Server-requestmethod ist POST");
       console_log_json($_POST);
-      if (isset($_POST["login"])) { //Benutzer soll angemeldet werden
+      if (isset($_POST["logout"])) { //Benutzer soll abgemeldet werden
+        logdb("User ".$_SESSION["username"]." with ".$_SESSION["user"]." logged off");
+        $userid = -1;
+        $_SESSION["user"] = -1;
+        $_SESSION["username"] = "";
+        session_destroy();
+      } else if (isset($_POST["login"])) { //Benutzer soll angemeldet werden
         console_log("Anmeldeversuch");
         if (isset($_POST["user"]) && isset($_POST["pass"])) { // Benutzername und Passwort wurden mitgeschickt
           console_log("Jetzt (sollte) angemeldet werden");
@@ -306,15 +312,22 @@
       <div class="modal-dialog">  
    <!-- Modal content-->  
            <div class="modal-content">  
+                <!-- Modal Header -->
+                <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
                 <div class="modal-header">  
                      <h4 class="modal-title">Logout</h4>  
                      <button type="button" class="close" data-dismiss="modal">&times;</button>  
                 </div>  
+                <!-- Modal body -->
                 <div class="modal-body">  
-                  <input type="submit" name="logout" id="logout_button" class="btn btn-warning">
-                  <input type="submit" name="abbrechen" id="cancel_button" class="btn btn-warning">
-                  </form>
+                  Abmelden
+                </div>
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                  <button type="submit" name="logout" id="logout_button" class="btn btn-primary">Abmelden</button>
+                  <button type="button" class="btn btn-primary" data-dismiss="Abbrechen">Abbrechen</button>
                 </div>  
+                </form>
            </div>  
       </div>  
  </div>  

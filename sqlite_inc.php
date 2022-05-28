@@ -141,6 +141,7 @@
   function getUserIdOf($user,$pass) {
     global $db;
     console_log("Benutzer anmelden");
+    logdb("Benuter anmelden: ".$user);
     //User in Datenbank suchen
     $stmt = $db->prepare("SELECT rowid,password FROM users WHERE name=:name");
     if ($stmt->bindValue(':name', $user, SQLITE3_TEXT)) { //  && $stmt->bindValue(':pass', $pass, SQLITE3_TEXT)) {
@@ -179,6 +180,18 @@
       console_log("Enable_Options nicht aktualisiert");
       console_log("Fehler: ".$db->lastErrorMsg);
     }    
+  }
+  
+  function logdb($message) {
+    global $db;
+    console_log("Log eintrag: ".$message);
+    $stmt = $db->prepare('INSERT INTO log (created,ip,userid,message) VALUES (strftime("%Y-%m-%d %H:%M:%S","now"),:ip,:userid,:message)');
+    console_log("Anzahl Parameter in Statement: ".$stmt->paramCount());
+    $stmt->bindValue(':ip', getUserIpAddr, SQLITE3_TEXT);
+    $stmt->bindValue(':userid', $_SESSION["userid"], SQLITE3_INTEGER);
+    $stmt->bindValue(':message', $message, SQLITE3_TEXT);
+    $result = $stmt->execute();
+    console_log_json($result);
   }
   
   //prüft ob in den Optionen gewisse Dinge erlaubt sind
@@ -233,6 +246,8 @@
     // prüfen ob tabellen existieren
     // user
     checkTableExists("users","CREATE TABLE users (name TEXT, password TEXT, lastedited TEXT, created TEXT);");
+    // log
+    checkTableExists("log","CREATE TABLE log (created TEXT, ip TEXT, userid INT, message TEXT);");
     
     // Themenbereiche
     if (!checkTableExists("themenfelder","CREATE TABLE themenfelder (bezeichnung TEXT, superthema INTEGER DEFAULT -1);")) {
@@ -291,16 +306,15 @@ EOF;
     }
        
     //TODO Limits prüfen - wenn es welche geben sollte (z.B. Objekte anlegen in einer gewissen Zeit)
-    //if (CHECKLIMITS) {
-    if (false) {
+    if (CHECKLIMITS) {
       // Alle Bordkarten löschen die älter als MAXTIME sind
-      $sql = "DELETE FROM piraten where strftime('%s','now') - strftime('%s',erzeugt) > ".MAXTIME.";";
+      $sql = "DELETE FROM log where strftime('%s','now') - strftime('%s',created) > ".MAXLOGTIME.";";
       console_log("SQL: ".$sql);
       if($db->exec($sql)) {
-        console_log("piraten bereinigt");
+        console_log("logs cleaned");
       } else {
-        console_log("Piratenbereinigung fehltgeschlagen");
-        console_log("Fehler: ".$db->lastErrorMsg);
+        console_log("error in log cleaning");
+        console_log("errormsg: ".$db->lastErrorMsg);
       }      
     }
   }
