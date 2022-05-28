@@ -137,51 +137,8 @@
     }
   }
 
-  //wechsel zu wunsch-Client-ID wenn möglich
-  function changeToClientID($pref_id) {
-    global $db;
-    if (!is_numeric($pref_id)) {
-      $pref_id=-1;
-    }
-    console_log("Wechsel zu Wunsch-ID prüfen ".$pref_id);
-    //Client in Datenbank suchen
-    $sql = "select rowid,user from clients where session_id='".session_id()."' AND rowid=".$pref_id.";";
-    console_log("SQL: ".$sql);
-    $res=$db->query($sql);
-    if ($row = $res->fetchArray(SQLITE3_ASSOC)) { // gefunden
-      $sql = "UPDATE clients set lastedited=strftime('%Y-%m-%d %H:%M:%S','now') where rowid='".$row['rowid']."';";
-      console_log("SQL: ".$sql);
-      $res=$db->exec($sql);
-      $_SESSION["clientid"]=$row['rowid'];
-      //$_SESSION["user"]=$row['user'];
-      console_log("clientid: ".$_SESSION["clientid"]." user: ".$_SESSION["user"]);
-      return true;
-    }
-    return false;
-  }
-  
-  function setClientIDUndUser() {
-        global $db;
-        console_log("Session-ID setzen und in Datenbank registrieren - Inseltyp bestimmen");
-        //Client in Datenbank suchen
-        $sql = "select rowid,user from clients where session_id='".session_id()."';";
-        console_log("SQL: ".$sql);
-        $res=$db->query($sql);
-        if ($row = $res->fetchArray(SQLITE3_ASSOC)) { // gefunden
-          $sql = "UPDATE clients set lastedited=strftime('%Y-%m-%d %H:%M:%S','now') where rowid='".$row['rowid']."';";
-          console_log("SQL: ".$sql);
-          $res=$db->exec($sql);
-          $_SESSION["clientid"]=$row['rowid'];
-          //$_SESSION["user"]=$row['user'];
-          console_log("clientid: ".$_SESSION["clientid"]." user: ".$_SESSION["user"]);
-        } else { // nicht gefunden
-          return generateExtraClientID();
-        }
-        return true;  
-  }
-  
   //Benutzeranmeldedaten prüfen - gibt User-ID zurück (-2 wenn unbekannt, -3 wenn falsches Passwort, -1 bei sonstigen Fehlern)
-  function userIdZuAnmeldedaten($user,$pass) {
+  function getUserIdOf($user,$pass) {
     global $db;
     console_log("Benutzer anmelden");
     //User in Datenbank suchen
@@ -210,63 +167,7 @@
       return -1;
     }
   }
-  
-  //gibt alle zulässigen Client-IDs als Array zu dieser Session-ID
-  function getPossibleClientIDs() {
-    $return = array();
-    global $db;
-    console_log("Session-IDs für diese Session-ID auslesen");
-    //Client in Datenbank suchen
-    $sql = "select rowid,user from clients where session_id='".session_id()."';";
-    console_log("SQL: ".$sql);
-    $res=$db->query($sql);
-    while ($row = $res->fetchArray(SQLITE3_ASSOC)) { // gefunden
-      array_push($return, $row['rowid']);      
-    }
-    return $return;
-  }
-  
-  
-  //erzeugt zu dieser Session-ID eine neue Client-ID
-  function generateExtraClientID() {
-    global $db;
-    //Prüfen ob zu viele Clients in der letzten Zeit (Minute, Stunde, 5 Minuten... ?) erstellt wurden
-    if (CHECKLIMITS) {
-      $sql = "select count(*) as anz from clients;";
-      console_log("SQL: ".$sql);
-      if($res=$db->querySingle($sql)) {
-        console_log("Result: ".$res);
-        if ($res>=MAXCLIENTS) {
-          return false;
-        }
-      }
-      $sql = "select count(*) as anz from clients where session_id='".session_id()."';";
-      console_log("SQL: ".$sql);
-      if($res=$db->querySingle($sql)) {
-        console_log("Result: ".$res);
-        if ($res>=MAXCLIENTIDS) {
-          return false;
-        }
-      }
-    }    
-    $_SESSION["user"]=-1; // Noch kein aktiver user
-    $sql = "INSERT INTO clients (session_id, user, ipaddr, lastedited, created) VALUES ".
-    "('".session_id()."',".$_SESSION["user"].",'".getUserIpAddr()."',strftime('%Y-%m-%d %H:%M:%S','now'),strftime('%Y-%m-%d %H:%M:%S','now'));";
-    console_log("SQL: ".$sql);
-    if($db->exec($sql)) {
-      console_log("Client registriert");
-    } else {
-      console_log("Eintrag nicht erfolgt");
-      console_log("Fehler: ".$db->lastErrorMsg);
-    }
-    $sql = "select max(rowid) from clients where session_id='".session_id()."';";
-    console_log("SQL: ".$sql);
-    if($res=$db->querySingle($sql)) {
-      $_SESSION["clientid"]=$res;
-    }
-    return true;    
-  }
-  
+    
   //Optionen in der Tabelle ändern (Von True auf False)
   function changeOptionWithID($rowid) {
     global $db;
@@ -293,137 +194,22 @@
       return ($res==1);
     }
     return false;
-  }
+  }  
   
-  function gibNeueBordkartenNummer() {
-      global $db;
-      //Anzahl vorhandener Bordkarten ermitteln
-      $anz_bk=-1;
-      $sql = "select count(*) from piraten;";
-      console_log("SQL: ".$sql);
-      if($res=$db->querySingle($sql)) {
-        $anz_bk=$res;
-      }
-      console_log("Es gibt ".$anz_bk." Bordkarten");
-      if ($anz_bk >= MAXBK) { // Zu viele Bordkarten
-        return false;
-      }
-      $bknr = -1;
-      do {
-        $bknr = rand(1234,8912+$anz_bk+MAXBK);
-        $sql = "select rowid from piraten where bordcardnr=".$bknr.";";
-        console_log("SQL: ".$sql);
-      } while($res=$db->querySingle($sql));
-      //in Datenbank eintragen
-      if(bordkartenNummerInDBEintragen($bknr)>=0) {
-        console_log("Bordkartennummer registriert");
-      } else {
-        console_log("Eintrag nicht erfolgt");
-        console_log("Fehler: ".$db->lastErrorMsg);
-      }
-      return $bknr;      
-  }
-  
-  //Trage die übergebene Bordkartennummer in die Datenbank ein
-  //gibt diese bei Erfolg zurück sonst -1
-  function bordkartenNummerInDBEintragen($bknr) {
-    global $db;
-    $stmt = $db->prepare("INSERT INTO piraten (bordcardnr, aktinsel, letzteInsel, tour, letzteFahrtZeit, erzeugt) VALUES ".
-      "(:bknr,'1','-1','',strftime('%Y-%m-%d %H:%M:%S','now'),strftime('%Y-%m-%d %H:%M:%S','now'))");
-    if ($stmt->bindValue(':bknr', $bknr, SQLITE3_INTEGER)) {
-      set_error_handler(function() { /* ignore errors */ });
-      if ($stmt->execute()) { //erfolgreich
-        return $bknr;
-      }
-      restore_error_handler();
-    }
-    return -1; 
-  }
-  
-  //Lässt den Piraten mit der Bordkartennr von der Inselnr
-  //Mit dem gewählten Schiff fahren und gibt Info zurück
-  //Array mit valid = true/false und message
-  function gibRoutenInfo($bknr, $schiff, $inselnr) {
-    global $db;
-    //Return Array
-    $arr = array();
-    $arr['valid'] = false;
-    //zielInsel ermitteln
-    $zielinsel = 0;
-    $sql = "select ziel".$schiff." from inseln where inselnr=".$inselnr.";";
-    console_log("SQL: ".$sql);
-    if($res=$db->querySingle($sql)) {
-      $zielinsel=$res;
-      $arr['ziel']=$zielinsel;
-    } else {
-      $arr['message']="Fehler! Dieses Schiff (".$schiff.") gibt es nicht !";
-      return $arr;
-    }
-    //Tabelle piraten aktualisieren
-    $sql = "UPDATE piraten set letzteFahrtZeit=strftime('%Y-%m-%d %H:%M:%S','now'),aktinsel='".$zielinsel."',letzteInsel='".$inselnr."', tour=tour||'".$schiff."' where bordcardnr='".$bknr."';";
-    console_log("SQL: ".$sql);
-    if ($res=$db->exec($sql)) {
-      $arr['valid'] = true;
-      $arr['message'] = "Der Pirat mit der Bordkarte ".$bknr." fährt von ".gibInselName($inselnr)." nach ".gibInselName($zielinsel)."!";
-    } else {
-      $arr['message'] = "Reise konnte leider nicht gebucht werden - Fehler";
-    }
-    return $arr;
-  }
-  
-  function inselNrVonClientSetzen($clientid, $neueInselNr) {
-    global $db;
-    $sql = "UPDATE clients set user='".$neueInselNr."', lastedited=strftime('%Y-%m-%d %H:%M:%S','now') where rowid='".$clientid."';";
-    console_log("SQL: ".$sql);
-    if($res=$db->exec($sql)) {
-      console_log("Success");
-      return true;
-    }
-    return false; 
-   }
-  
+  //Set new password or create new user 
   function setNewPassword($user, $pass) {
     global $db;
+    // TODO: check if user exists
     console_log("Passwort setzen");
-    $stmt = $db->prepare('UPDATE users SET password=:value WHERE name=:username');
+    $stmt = $db->prepare('UPDATE users SET password=:value, lastedited=strftime("%Y-%m-%d %H:%M:%S","now") WHERE name=:username');
     console_log("Anzahl Parameter in Statement: ".$stmt->paramCount());
     $stmt->bindValue(':value', PASSWORD_HASH($pass, PASSWORD_DEFAULT), SQLITE3_TEXT);
     $stmt->bindValue(':username', $user, SQLITE3_TEXT);
     $result = $stmt->execute();
     console_log_json($result);
-    // irgendwie auf Success prüfen?
+    // TODO irgendwie auf Success prüfen?
   }
-  
-  // gibt eine Array zum Piraten zurück, dass die Infos enthält
-  // valid->true/false, aktInsel, letzteInsel, tour
-  function gibPiratenInfo($bknr) {
-    global $db;
-    $sql = "select * from piraten where bordcardnr='".$bknr."';";
-    console_log("SQL: ".$sql);
-    $res=$db->query($sql);
-    $arr = array();
-    if ($row = $res->fetchArray(SQLITE3_ASSOC)) {
-      $arr['valid']=true;
-      $arr['aktInsel']=$row['aktInsel'];
-      $arr['letzteInsel']=$row['letzteInsel'];
-      $arr['tour']=$row['tour'];
-    } else {
-      $arr['valid']=false;
-    }
-    return $arr;    
-  }
-  
-  // Gibt den Namen der Insel mit der Nummer zurück
-  function gibInselName($nr) {
-    global $db;
-    $sql = "select name from inseln where inselnr='".$nr."';";
-    console_log("SQL: ".$sql);
-    if($res=$db->querySingle($sql)) {
-      return $res;
-    }
-    return "unbekannte Insel";  
-  }
-    
+      
   function checkTableExists($name,$createstmt) {
     //checks if table $name exists and returns true
     // if not - returns false and table will be created using createstmt
@@ -447,8 +233,6 @@
     // prüfen ob tabellen existieren
     // user
     checkTableExists("users","CREATE TABLE users (name TEXT, password TEXT, lastedited TEXT, created TEXT);");
-    // clients
-    checkTableExists("clients","CREATE TABLE clients (session_id TEXT, user INTEGER, ipaddr TEXT, lastedited TEXT, created TEXT);");
     
     // Themenbereiche
     if (!checkTableExists("themenfelder","CREATE TABLE themenfelder (bezeichnung TEXT, superthema INTEGER DEFAULT -1);")) {
@@ -506,11 +290,10 @@ EOF;
       }
     }
        
-    //Limits prüfen
-    //diese Tabellen gibt es nicht mehr
+    //TODO Limits prüfen - wenn es welche geben sollte (z.B. Objekte anlegen in einer gewissen Zeit)
     //if (CHECKLIMITS) {
     if (false) {
-      // Alle Clients und Bordkarten löschen die älter als MAXTIME sind
+      // Alle Bordkarten löschen die älter als MAXTIME sind
       $sql = "DELETE FROM piraten where strftime('%s','now') - strftime('%s',erzeugt) > ".MAXTIME.";";
       console_log("SQL: ".$sql);
       if($db->exec($sql)) {
@@ -518,16 +301,7 @@ EOF;
       } else {
         console_log("Piratenbereinigung fehltgeschlagen");
         console_log("Fehler: ".$db->lastErrorMsg);
-      }
-      $sql = "DELETE FROM clients where strftime('%s','now') - strftime('%s',created) > ".MAXTIME.";";
-      console_log("SQL: ".$sql);
-      if($db->exec($sql)) {
-        console_log("clients bereinigt");
-      } else {
-        console_log("Clientbereinigung fehltgeschlagen");
-        console_log("Fehler: ".$db->lastErrorMsg);
-      }
-      
+      }      
     }
   }
 ?>

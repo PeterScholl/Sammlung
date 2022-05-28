@@ -42,9 +42,7 @@
         echo '</script>';
       }
     }
-    // für Testzwecke unset session variable
-    //unset($_SESSION["clientid"]);
-    //console_log("Client-ID gelöscht: ".$_SESSION["clientid"]);
+    
     //session_destroy();
     console_log("Session-ID: ".session_id());
     console_log("PHP-Version: ".phpversion());
@@ -67,12 +65,7 @@
       console_log( "Opened database successfully");
    }
 
-   //Client registrieren - Login durchfuehren
-    if (!changeToClientID($_SESSION["clientid"])) { //war nicht schon registriert
-      if (!setClientIDUndUser()) { //Registrierung fehlgeschlagen
-        $message_err = "Client konnte nicht angemeldet werden, evtl. maximale Anzahl (".MAXCLIENTS.") überschritten...";
-      }
-    }
+   //TODO: decide if user-authentication at this point is really needed
     
     // Processing get-data when form is submitted
     if($_SERVER["REQUEST_METHOD"] == "GET") {
@@ -102,7 +95,7 @@
         console_log("Anmeldeversuch");
         if (isset($_POST["user"]) && isset($_POST["pass"])) { // Benutzername und Passwort wurden mitgeschickt
           console_log("Jetzt (sollte) angemeldet werden");
-          $userid = userIdZuAnmeldedaten($_POST["user"],$_POST["pass"]);
+          $userid = getUserIdOf($_POST["user"],$_POST["pass"]);
           if ($userid < 0) { // Fehler
             $message_err = "Fehler bei der Anmeldung";
             if ($userid == -3) $message_err = "Anmeldung nicht möglich - falsches Passwort";
@@ -140,7 +133,7 @@
       </li>          
     </ul>
   </div>  
-  <a class="navbar-brand ml-auto" href="#">Sammlungsverwaltung</a><span class="badge badge-light"><?php echo 'Client-ID:'.$_SESSION["clientid"]; ?></span><br>
+  <a class="navbar-brand ml-auto" href="#">Sammlungsverwaltung</a>
   <?php
     if ($_SESSION["user"]<1) {
       echo '<a class="badge badge-light" data-toggle="modal" href="#loginModal">anmelden</a>';
