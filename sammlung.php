@@ -156,7 +156,7 @@
 <div class="container" style="margin-top:80px">
   <?php
   if ($message_info!="") {
-    echo "<div class=\"alert alert-success alert-dismissible\">";
+    echo "<div id=\"message_info\" class=\"alert alert-success alert-dismissible\">";
     echo "<button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>";
     echo "<strong>".$message_info."</strong></div>";
   }

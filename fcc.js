@@ -4,6 +4,9 @@ var fccdaten = {};
 
 function init() {
   console.log("fcc-skript initialisieren...");
+  var duration = 20000; //20 seconds time for alert to disappear
+  //setTimeout(function () { $('#alert').hide(); }, duration);
+  setTimeout(function () { document.getElementById("message_info").style.display = "none"; }, duration);
 }
 
 function loadDocGet(url, cFunction) {
