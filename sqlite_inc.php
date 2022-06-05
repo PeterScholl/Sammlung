@@ -276,6 +276,9 @@ EOF;
     checkTableExists("versuch","CREATE TABLE versuch (bezeichnung TEXT);");
     // VersuchContainsObjekt
     checkTableExists("versuchCobjekt","CREATE TABLE versuchCobjekt (vid INTEGER, oid INTEGER, anzahl INTEGER);");
+    // Files
+    checkTableExists("files","CREATE TABLE files (name TEXT, place TEXT, size INTEGER, downloads INTEGER, created TEXT, edited TEXT);");
+
     
     
     // enableoptions -  0 is false - 1 is true
@@ -317,5 +320,20 @@ EOF;
         console_log("errormsg: ".$db->lastErrorMsg);
       }      
     }
+  }
+
+// ***** Upload-Aktionen ****
+  //eine Datei in der Datenbank speichern te Tabellenzeile zurückgegeben ohne rowid
+  function storeUploadedFileInDB($filename, $place, $size) {
+    global $db;
+    console_log("File in DB eintragen");
+    $stmt = $db->prepare('INSERT INTO files (name, place, size, downloads, created, edited) VALUES (:fname, :place, :size, 0,strftime("%Y-%m-%d %H:%M:%S","now"),strftime("%Y-%m-%d %H:%M:%S","now"))');
+    $stmt->bindValue(':size', $size, SQLITE3_INTEGER);
+    $stmt->bindValue(':fname', $filename, SQLITE3_TEXT);
+    $stmt->bindValue(':place', $place, SQLITE3_TEXT);
+    console_log("  Statement: ".htmlspecialchars($stmt->getSQL(true)));
+    $result = $stmt->execute();
+    console_log("   Statement executed");
+    return 0;
   }
 ?>

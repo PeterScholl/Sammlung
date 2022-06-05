@@ -211,6 +211,9 @@ EOF;
           <a class="nav-link" href="?options">Optionen</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link" href="uploadForm.php">Upload File</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link disabled" href="#">.. to be continued ..</a>
         </li>
       </ul>
