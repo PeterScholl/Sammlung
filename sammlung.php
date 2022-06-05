@@ -290,7 +290,14 @@
               <button type="submit" name="save" class="btn btn-primary">Save</button>
             </div>
           </form>
-        </div>       
+        </div>
+        <script>
+        // the following code makes the name of the file appear on select
+        $(".custom-file-input").on("change", function() {
+          var fileName = $(this).val().split("\\").pop();
+          $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
+        </script>       
         <?php
       } else{
       ?>
