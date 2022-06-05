@@ -180,7 +180,7 @@ EOF;
   </div>  
 </nav>
 
-<div class="container" style="margin-top:80px">
+<div class="container-fluid" style="margin-top:80px">
   <?php 
     if(!empty($result)){
       echo '<div class="alert alert-info">' . $result . '</div>';
@@ -192,7 +192,7 @@ EOF;
 
 
   <div class="row">
-    <div class="col-sm-4">
+    <div class="col-sm-3">
       <h3>Admin Menu</h3>
       <ul class="nav nav-pills flex-column">
         <li class="nav-item">
@@ -219,7 +219,7 @@ EOF;
       </ul>
       <hr class="d-sm-none">
     </div>
-    <div class="col-sm-8">
+    <div class="col-sm-9">
     <?php
       if ($show=='tables') {
         echo "\n";

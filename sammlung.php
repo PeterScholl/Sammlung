@@ -53,6 +53,7 @@
     // Zustände
     define("Z_SHOWTHEMEN",2);  //Themenübersicht anzeigen
     define("Z_SHOWOBJEKTELIST",1);
+    define("Z_UPLOADDIALOGUE",3); //show upload dialogue
     $zustand = Z_SHOWTHEMEN;
     
    //Open-and-prepare database
@@ -76,6 +77,9 @@
         } else if($_GET["show"]==="objekte") {
           console_log("Objekte werden angezeigt");
           $zustand = Z_SHOWOBJEKTELIST;
+        } else if($_GET["show"]==="upload") {
+          console_log("Uploaddialogue is shown");
+          $zustand = Z_UPLOADDIALOGUE;
         }        
       }
       if (isset($_GET["neueBK"])) { //hier soll eine neue Bordkarte erzeugt werden
@@ -91,7 +95,41 @@
     if($_SERVER["REQUEST_METHOD"] == "POST") {
       console_log("Server-requestmethod ist POST");
       console_log_json($_POST);
-      if (isset($_POST["logout"])) { //Benutzer soll abgemeldet werden
+      if (isset($_POST['save'])) { // if save button on the form is clicked
+        // name of the uploaded file
+        $filename = $_FILES['myfile']['name'];
+        logdb("File uploaded: ".$filename);
+        console_log("File to upload: ".$filename);
+        // destination of the file on the server
+        // TODO - check directory hierachy
+        $destination = UPLOADDIR.'/' . $filename;
+        // get the file extension
+        $extension = pathinfo($filename, PATHINFO_EXTENSION);
+        // the physical file on a temporary uploads directory on the server
+        $file = $_FILES['myfile']['tmp_name'];
+        $size = $_FILES['myfile']['size'];
+        console_log("  tmp_name: ".$file);
+        console_log("  size: ".$size." - extension: ".$extension);
+        if (!in_array($extension, ['zip', 'pdf', 'docx'])) {
+          console_log("   ERROR - Wrong file extension");
+          $message_err = "Your file extension must be .zip, .pdf or .docx";
+        } elseif ($_FILES['myfile']['size'] > MAXUPLOADFILESIZE) { // file shouldn't be larger than defined in config.php
+          console_log("   ERROR - File too large > ".MAXUPLOADFILESIZE);
+          $message_err = "Your file is too large. Max: ".MAXUPLOADFILESIZE;
+        } else {
+          console_log("  try to move uploaded file....");
+          // move the uploaded (temporary) file to the specified destination
+          // TODO: Check if file exists...
+          if (move_uploaded_file($file, $destination)) {
+            console_log("   success");
+            storeUploadedFileInDB($filename, $destination, $size);
+            $message_info="File ".htmlspecialchars($filename)." uploaded";
+          } else {
+            console_log("   failed");
+            $message_err="Failed to upload file.";
+          }
+        }
+      } else if (isset($_POST["logout"])) { //Benutzer soll abgemeldet werden
         logdb("User ".$_SESSION["username"]." with ".$_SESSION["user"]." logged off");
         $userid = -1;
         $_SESSION["user"] = -1;
@@ -125,12 +163,26 @@
       <li class="nav-item">
         <a class="nav-link" href="<?php echo HOMEPAGE;?>">Home</a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="<?php echo HOMEPAGE;?>?show=themen">Themen</a>
-      </li>    
-      <li class="nav-item">
-        <a class="nav-link" href="<?php echo HOMEPAGE;?>?show=objekte">Objekte</a>
-      </li>    
+      <!-- Dropdown Ansichten -->
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+          Ansichten
+        </a>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=themen">Themen</a>
+          <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=objekte">Objekte</a>
+        </div>
+      </li>
+      <!-- Dropdown Aktionen -->
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+          Aktionen
+        </a>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=upload">Upload</a>
+        </div>
+      </li>
+      <!-- Admin und Info -->
       <li class="nav-item">
         <a class="nav-link" href="admin.php">Admin</a>
       </li>    
@@ -222,6 +274,24 @@
             }
           echo "</tbody></table></div>\n";
         }
+      } else if ($zustand ==Z_UPLOADDIALOGUE) {
+        //Uploaddialogue
+        ?>
+        <div class="container">
+          <h2>Upload File</h2>
+          <p>Bitte die Datei hochladen</p>
+          <form action="./<?php echo HOMEPAGE;?>" method="post" enctype="multipart/form-data">
+            <div class="custom-file mb-3">
+              <input type="file" class="custom-file-input" id="customFile" name="myfile">
+              <label class="custom-file-label" for="customFile">Datei waehlen</label>
+            </div>
+            
+            <div class="mt-3">
+              <button type="submit" name="save" class="btn btn-primary">Save</button>
+            </div>
+          </form>
+        </div>       
+        <?php
       } else{
       ?>
         <p>
