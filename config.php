@@ -7,5 +7,6 @@
   define("MAXUPLOADFILESIZE", 1000000); // maximum is 1 MB
   define("ADMINPASS", "pass"); //Passwort für Adminseite
   define("HOMEPAGE", "sammlung.php"); // Initial home-Page
+  define("UPLOADDIR", "uploads"); //Verzeichnis für Uploads
   
 ?>

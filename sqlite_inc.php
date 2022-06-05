@@ -278,7 +278,23 @@ EOF;
     checkTableExists("versuchCobjekt","CREATE TABLE versuchCobjekt (vid INTEGER, oid INTEGER, anzahl INTEGER);");
     // Files
     checkTableExists("files","CREATE TABLE files (name TEXT, place TEXT, size INTEGER, downloads INTEGER, created TEXT, edited TEXT);");
-
+    if (file_exists(UPLOADDIR)) {
+      console_log("DoChecks: upload dir exists (".UPLOADDIR.")");
+      if (is_dir(UPLOADDIR)) {
+        console_log(" and is a directory");
+      } else {
+        console_log("  "-UPLOADDIR." is not a directory");
+        //TODO: What to do now?
+      }
+    } else {
+      console_log("DoChecks: creating uploaddir ".UPLOADDIR);
+      if (mkdir(UPLOADDIR, 0775)) {
+        console_log("  success");
+      } else {
+        console_log("  failed");
+      }
+      
+    }
     
     
     // enableoptions -  0 is false - 1 is true
