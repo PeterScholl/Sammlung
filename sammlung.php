@@ -54,6 +54,7 @@
     define("Z_SHOWTHEMEN",2);  //Themenübersicht anzeigen
     define("Z_SHOWOBJEKTELIST",1);
     define("Z_UPLOADDIALOGUE",3); //show upload dialogue
+    define("Z_SHOWFILELIST",4);
     $zustand = Z_SHOWTHEMEN;
     
    //Open-and-prepare database
@@ -80,6 +81,9 @@
         } else if($_GET["show"]==="upload") {
           console_log("Uploaddialogue is shown");
           $zustand = Z_UPLOADDIALOGUE;
+        } else if($_GET["show"]==="files") {
+          console_log("Filelist is shown");
+          $zustand = Z_SHOWFILELIST;
         }        
       }
       if (isset($_GET["neueBK"])) { //hier soll eine neue Bordkarte erzeugt werden
@@ -100,14 +104,13 @@
         $filename = $_FILES['myfile']['name'];
         logdb("File uploaded: ".$filename);
         console_log("File to upload: ".$filename);
-        // destination of the file on the server
-        // TODO - check directory hierachy
-        $destination = UPLOADDIR.'/' . $filename;
         // get the file extension
         $extension = pathinfo($filename, PATHINFO_EXTENSION);
         // the physical file on a temporary uploads directory on the server
         $file = $_FILES['myfile']['tmp_name'];
         $size = $_FILES['myfile']['size'];
+        // destination of the file on the server
+        $destination = UPLOADDIR.'/' . basename($file); //we keep the temporary name - original filename is stored in db
         console_log("  tmp_name: ".$file);
         console_log("  size: ".$size." - extension: ".$extension);
         if (!in_array($extension, ['zip', 'pdf', 'docx'])) {
@@ -116,10 +119,16 @@
         } elseif ($_FILES['myfile']['size'] > MAXUPLOADFILESIZE) { // file shouldn't be larger than defined in config.php
           console_log("   ERROR - File too large > ".MAXUPLOADFILESIZE);
           $message_err = "Your file is too large. Max: ".MAXUPLOADFILESIZE;
+        } else if (getNrOfUploadsInLastHour() > MAXUPLOADCOUNT) { // to many uploads
+          console_log("   ERROR - too many uploads".getNrOfUploadsInLastHour());
+          $message_err = "too many uploads in last hour";
         } else {
-          console_log("  try to move uploaded file....");
+          console_log("  try to move uploaded file from ".htmlspecialchars($file)." to ".htmlspecialchars($destination));
           // move the uploaded (temporary) file to the specified destination
           // TODO: Check if file exists...
+          while(file_exists($destination) && strlen(basename($destination)) < 20) {
+            $destination=$destination."a";
+          }
           if (move_uploaded_file($file, $destination)) {
             console_log("   success");
             storeUploadedFileInDB($filename, $destination, $size);
@@ -171,6 +180,7 @@
         <div class="dropdown-menu">
           <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=themen">Themen</a>
           <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=objekte">Objekte</a>
+          <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=files">Files</a>
         </div>
       </li>
       <!-- Dropdown Aktionen -->
@@ -219,39 +229,26 @@
   }
   ?>
   <div class="row">
-    <div class="col-sm-8 mx-auto">
+    <div class="col-sm-12 mx-auto">
       <?php
       // Zustand Themen anzeigen
       // Evtl. treeview ala https://www.w3schools.com/howto/howto_js_treeview.asp
-      if ($zustand == Z_SHOWTHEMEN) {
-        echo '<h5 id="tblname">Themen&uuml;bersicht</h5>';
-        $name = "themenfelder";
-        $sql = "SELECT rowid,* FROM ".$name . ";";
-        if ($res = $db->query($sql)) {
-         echo "<div class=\"table-responsive\"><table class=\"table\"><thead><tr>\n";
-            for($i = 0; $i<$res->numColumns(); $i++) {
-              echo "<th>".$res->columnName($i)."</th>\n";			
-            }
-          echo "</tr></thead><tbody>\n";
-            while($row = $res->fetchArray(SQLITE3_NUM)) {
-              echo "<tr>";
-              for($i = 0; $i<$res->numColumns(); $i++) {
-                echo "<td>";
-                if ($i==0) {
-                  echo "<a href=\"?delrow=".$row[0]."&table=".$name."&showtables\" class=\"text-danger\" role=\"button\">&times;</a>";
-                  echo "<a href=\"?changerow=".$row[0]."&table=".$name."\">".$row[0]."</a></td>\n";
-                } else {
-                  echo $row[$i]."</td>\n";
-                }
-              }		
-              echo "</tr>\n";
-            }
-          echo "</tbody></table></div>\n";
+      if ($zustand == Z_SHOWTHEMEN || $zustand == Z_SHOWOBJEKTELIST || $zustand == Z_SHOWFILELIST) {
+        switch($zustand) {
+          case Z_SHOWTHEMEN:
+            echo '<h5 id="tblname">Themen&uuml;bersicht</h5>';
+            $name = "themenfelder";
+            break;
+          case Z_SHOWFILELIST:
+            echo '<h5 id="tblname">Files</h5>';
+            $name = "files";
+            break;
+          case Z_SHOWOBJEKTELIST:
+          default:
+            echo '<h5 id="tblname">Objekt&uuml;bersicht</h5>';
+            $name = "objekte";
+            break;
         }
-      } else if ($zustand == Z_SHOWOBJEKTELIST) {
-        //Objekte anzeigen
-        echo '<h5 id="tblname">Objekt&uuml;bersicht</h5>';
-        $name = "objekte";
         $sql = "SELECT rowid,* FROM ".$name . ";";
         if ($res = $db->query($sql)) {
          echo "<div class=\"table-responsive\"><table class=\"table\"><thead><tr>\n";

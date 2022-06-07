@@ -6,9 +6,7 @@ function init() {
   console.log("fcc-skript initialisieren...");
   var duration = 20000; //20 seconds time for alert to disappear
   //setTimeout(function () { $('#alert').hide(); }, duration);
-  if (document.getElementById("message_info") != null) {
-    setTimeout(function () { document.getElementById("message_info").style.display = "none"; }, duration);
-  }
+    setTimeout(function () {   if (document.getElementById("message_info")) { document.getElementById("message_info").style.display = "none"; } }, duration);
 }
 
 function loadDocGet(url, cFunction) {

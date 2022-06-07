@@ -137,6 +137,21 @@
     }
   }
 
+  // get number of uploaded files during last hour
+  function getNrOfUploadsInLastHour() {
+    global $db;
+    $sql = "SELECT count(*) FROM files where strftime('%s','now') - strftime('%s',created) < 3600;";
+    console_log("SQL: ".$sql);
+    if($res=$db->querySingle($sql)) {
+      $anz_upl=$res;
+    } else {
+      console_log("  Error - no result");
+      $anz_upl = MAXUPLOADCOUNT+1;      
+    }
+    console_log("  there were ".$anz_upl." uploads during the last hour");
+    return $anz_upl;
+  }
+
   //Benutzeranmeldedaten prüfen - gibt User-ID zurück (-2 wenn unbekannt, -3 wenn falsches Passwort, -1 bei sonstigen Fehlern)
   function getUserIdOf($user,$pass) {
     global $db;
