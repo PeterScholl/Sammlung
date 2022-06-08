@@ -172,6 +172,28 @@
       logdb("Error on fetching result");
     }
   }
+  
+  function insertUpdateTheme($bezeichnung, $superthema, $rowid=-1) {
+    global $db;
+    if ($rowid>0) { //edit theme
+      
+    } else { // new theme
+      if (strlen($bezeichnung)>0) {
+        logdb("New Theme anlegen");
+        //TODO check if superthema is integer and exists
+        
+        $stmt = $db->prepare('INSERT INTO themen (bezeichnung,superthema,created,edited) VALUES (:bez, :st, strftime("%Y-%m-%d %H:%M:%S","now"),strftime("%Y-%m-%d %H:%M:%S","now"));');
+        $stmt->bindValue(':bez', $bezeichnung, SQLITE3_TEXT);
+        $stmt->bindValue(':st', $superthema, SQLITE3_INTEGER);
+        console_log("  Statement to execute: ".htmlspecialchars($stmt->getSQL(true)));
+        $stmt->execute();
+      } else { // String has length 0
+        logdb("New Theme has length 0");
+        return -1;
+      }
+    }
+    return 0;
+  }
 
   // get number of uploaded files during last hour
   function getNrOfUploadsInLastHour() {

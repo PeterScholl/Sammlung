@@ -191,6 +191,10 @@ ul, #myUL {
           console_log("Theme should be edited: ".$_POST["editid"]);
         } else {
           console_log("New theme");
+          // check if bezeichnung and superthema are valid
+          if (insertUpdateTheme($_POST["bezeichnung"], intval($_POST["supertheme"]))<0) {
+            $message_err="Thema konnte nicht erstellt werden";
+          }
         }        
       } else if (isset($_POST["logout"])) { //Benutzer soll abgemeldet werden
         logdb("User ".$_SESSION["username"]." with ".$_SESSION["user"]." logged off");
