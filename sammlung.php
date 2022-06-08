@@ -94,6 +94,7 @@ ul, #myUL {
     define("Z_SHOWOBJEKTELIST",1);
     define("Z_UPLOADDIALOGUE",3); //show upload dialogue
     define("Z_SHOWFILELIST",4);
+    define("Z_EDITTHEME",5); //edit or add themes
     if (!isset($_SESSION["zustand"])) {
       $_SESSION["zustand"] = Z_SHOWTHEMEN;
     }
@@ -126,7 +127,10 @@ ul, #myUL {
         } else if($_GET["show"]==="files") {
           console_log("Filelist is shown");
           $_SESSION["zustand"] = Z_SHOWFILELIST;
-        }        
+        } else if($_GET["show"]==="edittheme") {
+          console_log("Theme should be edited or added");
+          $_SESSION["zustand"] = Z_EDITTHEME;  
+        }    
       }
       if (isset($_GET["neueBK"])) { //hier soll eine neue Bordkarte erzeugt werden
         if (isEnabled("allowBordCardCreation") && ($bknr = gibNeueBordkartenNummer())) {
@@ -180,6 +184,14 @@ ul, #myUL {
             $message_err="Failed to upload file.";
           }
         }
+      } else if (isset($_POST["edittheme"])) { //Thema soll editiert oder angelegt werden
+        console_log("Thema anlegen - siehe post-Variablen");
+        logdb("Thema anlegen...");
+        if (isset($_POST["editid"]) && intval($_POST["editid"])>0) {
+          console_log("Theme should be edited: ".$_POST["editid"]);
+        } else {
+          console_log("New theme");
+        }        
       } else if (isset($_POST["logout"])) { //Benutzer soll abgemeldet werden
         logdb("User ".$_SESSION["username"]." with ".$_SESSION["user"]." logged off");
         $userid = -1;
@@ -232,6 +244,7 @@ ul, #myUL {
         </a>
         <div class="dropdown-menu">
           <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=upload">Upload</a>
+          <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=edittheme">Thema anlegen</a>
         </div>
       </li>
       <!-- Admin und Info -->
@@ -358,7 +371,52 @@ ul, #myUL {
         });
         </script>       
         <?php
-      } else{
+      } else if ($_SESSION["zustand"] ==Z_EDITTHEME) {
+        // Thema editieren oder anlegen
+        $superthema="Keins";
+        if (isset($_GET["themaid"])) { 
+          //thema soll editiert werden
+          $editid = intval($_GET["themaid"]);
+          echo '<h5>Thema editieren - ID '.$editid.'</h5>';
+          $zeile = getSingleTableRow("themen",$editid);
+          $bezvorgabe=htmlspecialchars($zeile["bezeichnung"]);
+          if ($zeile["superthema"]!=-1) {
+            $zeile = getSingleTableRow("themen",intval($zeile["superthema"]));
+            $superthema=htmlspecialchars($zeile["bezeichnung"]);
+            $superthemaId=intval($zeile["rowid"]);
+          } 
+        } else {
+          echo '<h5>Thema anlegen</h5>';
+          $bezvorgabe="&lt;Neues Thema&gt;";
+          $superthemaId=-1;
+        }
+        ?>
+        <div id="EditOrAddTheme" class="form-group">
+          <form class="form" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+            <?php echo '<input type="hidden" name="editid" value="'.$editid.'">'; ?>
+            <div class="form-row">
+              <label for="supertheme" class="mt-2 mb-0">Überthema</label>
+              <select class="form-control" placeholder="<?php echo $superthema; ?>" id="supertheme" name="supertheme">
+                <option value="-1">Keins</option>
+                <?php
+                $array = getTableToSQL("SELECT rowid,bezeichnung FROM themen ORDER BY sort ASC");
+                for ($i = 0; $i < count($array); $i++) {
+                  echo '<option value="'.$array[$i]["rowid"].'"'.($i==$superthemaId?' selected="selected"':'').'>'.htmlspecialchars($array[$i]["bezeichnung"]).'</option>'."\n";
+                }
+                ?>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="bezeichnung" class="mt-2 mb-0">Bezeichnung</label>
+              <input type="text" class="form-control" placeholder="<?php echo $bezvorgabe; ?>" name="bezeichnung">
+            </div>
+            <div class="form-row mt-2">
+              <button type="submit" class="btn btn-primary" id="edittheme" name="edittheme">Submit</button>
+            </div>
+          </form>
+        </div>
+        <?php
+      } else {
       ?>
         <p>
           <table id="sort" class="table table-striped">
