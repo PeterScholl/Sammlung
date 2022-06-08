@@ -66,7 +66,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 <body>
     <div class="wrapper">
         <h2>Login</h2>
-        <p>Please give admin Password to manage Treasure-Island.</p>
+        <p>Please give admin Password to manage Sammlung.</p>
 
         <?php 
         if(!empty($login_err)){

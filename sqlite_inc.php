@@ -300,7 +300,7 @@
     checkTableExists("log","CREATE TABLE log (created TEXT, ip TEXT, userid INT, message TEXT);");
     
     // Themenbereiche
-    if (!checkTableExists("themenfelder","CREATE TABLE themenfelder (bezeichnung TEXT, superthema INTEGER DEFAULT -1);")) {
+    if (!checkTableExists("themenfelder","CREATE TABLE themenfelder (bezeichnung TEXT, superthema INTEGER DEFAULT -1, sort INTEGER, created TEXT, edited TEXT);")) {
       //Tabelle wurde neu angelegt - Basisdaten einrichten
            $sql =<<<EOF
         INSERT INTO themenfelder (bezeichnung) VALUES ('Elektrizitätslehre');
@@ -315,7 +315,7 @@ EOF;
        }
     }
     // Objekt
-    checkTableExists("objekt","CREATE TABLE objekt (bezeichnung TEXT, anzahl INTEGER DEFAULT 1, ort INTEGER DEFAULT -1, bild TEXT DEFAULT NULL);");
+    checkTableExists("objekt","CREATE TABLE objekt (bezeichnung TEXT, anzahl INTEGER DEFAULT 1, ortID INTEGER DEFAULT -1, bild TEXT DEFAULT NULL, sort INTEGER, created TEXT, edited TEXT);");
     // Schrank
     checkTableExists("schrank","CREATE TABLE schrank (bezeichnung TEXT, raum TEXT);");
     // Ort

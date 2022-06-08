@@ -55,7 +55,9 @@
     define("Z_SHOWOBJEKTELIST",1);
     define("Z_UPLOADDIALOGUE",3); //show upload dialogue
     define("Z_SHOWFILELIST",4);
-    $zustand = Z_SHOWTHEMEN;
+    if (!isset($_SESSION["zustand"])) {
+      $_SESSION["zustand"] = Z_SHOWTHEMEN;
+    }
     
    //Open-and-prepare database
     require_once("sqlite_inc.php");
@@ -75,16 +77,16 @@
       if (isset($_GET["show"])) { //hier soll die Ansicht ausgewählt werden
         if($_GET["show"]==="themen") {
           console_log("Themen werden angezeigt");
-          $zustand = Z_SHOWTHEMEN;
+          $_SESSION["zustand"] = Z_SHOWTHEMEN;
         } else if($_GET["show"]==="objekte") {
           console_log("Objekte werden angezeigt");
-          $zustand = Z_SHOWOBJEKTELIST;
+          $_SESSION["zustand"] = Z_SHOWOBJEKTELIST;
         } else if($_GET["show"]==="upload") {
           console_log("Uploaddialogue is shown");
-          $zustand = Z_UPLOADDIALOGUE;
+          $_SESSION["zustand"] = Z_UPLOADDIALOGUE;
         } else if($_GET["show"]==="files") {
           console_log("Filelist is shown");
-          $zustand = Z_SHOWFILELIST;
+          $_SESSION["zustand"] = Z_SHOWFILELIST;
         }        
       }
       if (isset($_GET["neueBK"])) { //hier soll eine neue Bordkarte erzeugt werden
@@ -234,8 +236,8 @@
       <?php
       // Zustand Themen anzeigen
       // Evtl. treeview ala https://www.w3schools.com/howto/howto_js_treeview.asp
-      if ($zustand == Z_SHOWTHEMEN || $zustand == Z_SHOWOBJEKTELIST || $zustand == Z_SHOWFILELIST) {
-        switch($zustand) {
+      if ($_SESSION["zustand"] == Z_SHOWTHEMEN || $_SESSION["zustand"] == Z_SHOWOBJEKTELIST || $_SESSION["zustand"] == Z_SHOWFILELIST) {
+        switch($_SESSION["zustand"]) {
           case Z_SHOWTHEMEN:
             echo '<h5 id="tblname">Themen&uuml;bersicht</h5>';
             $name = "themenfelder";
@@ -247,7 +249,7 @@
           case Z_SHOWOBJEKTELIST:
           default:
             echo '<h5 id="tblname">Objekt&uuml;bersicht</h5>';
-            $name = "objekte";
+            $name = "objekt";
             break;
         }
         $sql = "SELECT rowid,* FROM ".$name . ";";
@@ -264,7 +266,7 @@
                 if ($i==0) {
                   echo "<a href=\"?delrow=".$row[0]."&table=".$name."&showtables\" class=\"text-danger\" role=\"button\">&times;</a>";
                   echo "<a href=\"?changerow=".$row[0]."&table=".$name."\">".$row[0]."</a></td>\n";
-                } elseif ($zustand == Z_SHOWFILELIST && $res->columnName($i)=="name") {
+                } elseif ($_SESSION["zustand"] == Z_SHOWFILELIST && $res->columnName($i)=="name") {
                   echo "<a href=\"download.php?file=".$row[0]."\" target=\"_blank\">".$row[$i]."</a></td>\n";
                 } else {
                   echo $row[$i]."</td>\n";
@@ -274,7 +276,7 @@
             }
           echo "</tbody></table></div>\n";
         }
-      } else if ($zustand ==Z_UPLOADDIALOGUE) {
+      } else if ($_SESSION["zustand"] ==Z_UPLOADDIALOGUE) {
         //Uploaddialogue
         ?>
         <div class="container">
