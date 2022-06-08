@@ -60,6 +60,7 @@
    //Open-and-prepare database
     require_once("sqlite_inc.php");
     doChecks();
+    console_log("File Path 1: ".getFilePathFromFileID(1));
 
    if(!$db) {
       echo $db->lastErrorMsg();
@@ -263,6 +264,8 @@
                 if ($i==0) {
                   echo "<a href=\"?delrow=".$row[0]."&table=".$name."&showtables\" class=\"text-danger\" role=\"button\">&times;</a>";
                   echo "<a href=\"?changerow=".$row[0]."&table=".$name."\">".$row[0]."</a></td>\n";
+                } elseif ($zustand == Z_SHOWFILELIST && $res->columnName($i)=="name") {
+                  echo "<a href=\"download.php?file=".$row[0]."\">".$row[$i]."</a></td>\n";
                 } else {
                   echo $row[$i]."</td>\n";
                 }

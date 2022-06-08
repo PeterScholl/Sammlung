@@ -22,6 +22,7 @@
   // -- get the IP-Adress of the client
   function getUserIpAddr(){
     //function is used for logging in Database or recognizing different users
+    // Attention!! No Logging to console because is used before header!
     if(!empty($_SERVER['HTTP_CLIENT_IP'])){
         //ip from share internet
         $ip = $_SERVER['HTTP_CLIENT_IP'];
@@ -151,6 +152,39 @@
     console_log("  there were ".$anz_upl." uploads during the last hour");
     return $anz_upl;
   }
+  
+  // get FilePath from file - id
+  function getFilePathFromFileID($id) {
+    global $db;
+    $path = null;
+    if (is_int($id)) {
+      $sql = "SELECT place FROM files where rowid=".$id.";";
+      logdb("SQL: ".$sql);
+      if($res=$db->querySingle($sql)) {
+        $path=$res;
+        logdb("  Success - result: ".$res);
+      } else {
+        logdb("  Error - no result");
+      }
+    }
+    return $path;
+  }
+  // get FileName from file - id
+  function getFileNameFromFileID($id) {
+    global $db;
+    $path = null;
+    if (is_int($id)) {
+      $sql = "SELECT name FROM files where rowid=".$id.";";
+      logdb("SQL: ".$sql);
+      if($res=$db->querySingle($sql)) {
+        $path=$res;
+        logdb("  Success - result: ".$res);
+      } else {
+        logdb("  Error - no result");
+      }
+    }
+    return $path;
+  }
 
   //Benutzeranmeldedaten prüfen - gibt User-ID zurück (-2 wenn unbekannt, -3 wenn falsches Passwort, -1 bei sonstigen Fehlern)
   function getUserIdOf($user,$pass) {
@@ -198,15 +232,16 @@
   }
   
   function logdb($message) {
+    // Attention!! No Logging to console because is used before header!
     global $db;
-    console_log("Log eintrag: ".$message);
+    //console_log("Log eintrag: ".$message);
     $stmt = $db->prepare('INSERT INTO log (created,ip,userid,message) VALUES (strftime("%Y-%m-%d %H:%M:%S","now"),:ip,:userid,:message)');
-    console_log("Anzahl Parameter in Statement: ".$stmt->paramCount());
-    $stmt->bindValue(':ip', getUserIpAddr, SQLITE3_TEXT);
+    //console_log("Anzahl Parameter in Statement: ".$stmt->paramCount());
+    $stmt->bindValue(':ip', getUserIpAddr(), SQLITE3_TEXT);
     $stmt->bindValue(':userid', $_SESSION["userid"], SQLITE3_INTEGER);
     $stmt->bindValue(':message', $message, SQLITE3_TEXT);
     $result = $stmt->execute();
-    console_log_json($result);
+    //console_log_json($result);
   }
   
   //prüft ob in den Optionen gewisse Dinge erlaubt sind
