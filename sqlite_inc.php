@@ -137,6 +137,41 @@
       console_log("Unaccepted Values - key: ".$key." value ".$value);
     }
   }
+  
+  //rekursiv Themenliste ausgeben
+  function printThemenListeAsUL($id, $tiefe = 0) {
+    //check if $id is Integer
+    if (! is_int($id)) { return; }
+    global $db;
+    $sql = "SELECT rowid, bezeichnung FROM themen WHERE superthema=".$id." ORDER BY sort;";
+    logdb("sqlite_inc - printThemenListeAsUL - SQL: ".$sql);
+    $result = $db->query($sql);
+    if ($result) { // Success
+      if ($result->numColumns() && $result->columnType(0) != SQLITE3_NULL) {
+        // have rows
+        if ($tiefe==0) { echo "<UL>"; } else { echo "<UL class=\"nested\">"; }
+        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+          // check if there are subitems of this item
+          $sql = "SELECT * FROM themen WHERE superthema=".$row["rowid"].";";
+          if ($db->querySingle($sql)) {
+            //yes there are subitems
+            echo "<li><span class=\"caret\">".$row["bezeichnung"]."</span>";
+            printThemenListeAsUL($row["rowid"], $tiefe=$tiefe+1);
+            echo "</li>";
+          } else {
+            //there are no subitems
+            echo "<li>".$row["bezeichnung"]."</li>";
+          }
+        }
+        echo "</UL>";
+      } else {
+        // zero rows - Nothing to do!
+        logdb("sqlite_inc - printThemenListeAsUL - no rows - should not happen!");
+      } 
+    } else {
+      logdb("Error on fetching result");
+    }
+  }
 
   // get number of uploaded files during last hour
   function getNrOfUploadsInLastHour() {
@@ -300,18 +335,18 @@
     checkTableExists("log","CREATE TABLE log (created TEXT, ip TEXT, userid INT, message TEXT);");
     
     // Themenbereiche
-    if (!checkTableExists("themenfelder","CREATE TABLE themenfelder (bezeichnung TEXT, superthema INTEGER DEFAULT -1, sort INTEGER, created TEXT, edited TEXT);")) {
+    if (!checkTableExists("themen","CREATE TABLE themen (bezeichnung TEXT, superthema INTEGER DEFAULT -1, sort INTEGER, created TEXT, edited TEXT);")) {
       //Tabelle wurde neu angelegt - Basisdaten einrichten
            $sql =<<<EOF
-        INSERT INTO themenfelder (bezeichnung) VALUES ('Elektrizitätslehre');
-        INSERT INTO themenfelder (bezeichnung) VALUES ('Wärmelehre');
-        INSERT INTO themenfelder (bezeichnung,superthema) VALUES ('Stromkreis', (SELECT rowid from themenfelder WHERE bezeichnung='Elektrizitätslehre'));
+        INSERT INTO themen (bezeichnung) VALUES ('Elektrizitätslehre');
+        INSERT INTO themen (bezeichnung) VALUES ('Wärmelehre');
+        INSERT INTO themen (bezeichnung,superthema) VALUES ('Stromkreis', (SELECT rowid from themen WHERE bezeichnung='Elektrizitätslehre'));
 EOF;
        $ret = $db->exec($sql);
        if(!$ret) {
           echo $db->lastErrorMsg();
        } else {
-          console_log("Tabelle themenfelder mit Basisdaten bef&uuml;llt");
+          console_log("Tabelle themen mit Basisdaten bef&uuml;llt");
        }
     }
     // Objekt

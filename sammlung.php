@@ -24,6 +24,45 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script src="./fcc.js"></script>
   <script>window.onload=init();</script>
+  <style>
+ul, #myUL {
+  list-style-type: none;
+}
+
+#myUL {
+  margin: 0;
+  padding: 0;
+}
+
+.caret {
+  cursor: pointer;
+  -webkit-user-select: none; /* Safari 3.1+ */
+  -moz-user-select: none; /* Firefox 2+ */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none;
+}
+
+.caret::before {
+  content: "\25B6";
+  color: black;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.caret-down::before {
+  -ms-transform: rotate(90deg); /* IE 9 */
+  -webkit-transform: rotate(90deg); /* Safari */'
+  transform: rotate(90deg);  
+}
+
+.nested {
+  display: none;
+}
+
+.active {
+  display: block;
+}
+</style>
 </head>
 <?php
    
@@ -234,9 +273,9 @@
   <div class="row">
     <div class="col-sm-12 mx-auto">
       <?php
-      // Zustand Themen anzeigen
+      // alle Zustände, bei denen keine spezielle Tabelle angezeigt werden muss
       // Evtl. treeview ala https://www.w3schools.com/howto/howto_js_treeview.asp
-      if ($_SESSION["zustand"] == Z_SHOWTHEMEN || $_SESSION["zustand"] == Z_SHOWOBJEKTELIST || $_SESSION["zustand"] == Z_SHOWFILELIST) {
+      if ($_SESSION["zustand"] == Z_SHOWOBJEKTELIST || $_SESSION["zustand"] == Z_SHOWFILELIST) {
         switch($_SESSION["zustand"]) {
           case Z_SHOWTHEMEN:
             echo '<h5 id="tblname">Themen&uuml;bersicht</h5>';
@@ -276,6 +315,24 @@
             }
           echo "</tbody></table></div>\n";
         }
+      } else if ($_SESSION["zustand"] ==Z_SHOWTHEMEN) {
+        // Zustand Themen anzeigen
+        echo '<h5 id="tblname">Themen&uuml;bersicht</h5>';
+        //generate as nested unordered list
+        printThemenListeAsUL(-1);
+        ?>
+        <script>
+        var toggler = document.getElementsByClassName("caret");
+        var i;
+
+        for (i = 0; i < toggler.length; i++) {
+          toggler[i].addEventListener("click", function() {
+            this.parentElement.querySelector(".nested").classList.toggle("active");
+            this.classList.toggle("caret-down");
+          });
+        }
+        </script>
+        <?php
       } else if ($_SESSION["zustand"] ==Z_UPLOADDIALOGUE) {
         //Uploaddialogue
         ?>
