@@ -265,7 +265,7 @@
                   echo "<a href=\"?delrow=".$row[0]."&table=".$name."&showtables\" class=\"text-danger\" role=\"button\">&times;</a>";
                   echo "<a href=\"?changerow=".$row[0]."&table=".$name."\">".$row[0]."</a></td>\n";
                 } elseif ($zustand == Z_SHOWFILELIST && $res->columnName($i)=="name") {
-                  echo "<a href=\"download.php?file=".$row[0]."\">".$row[$i]."</a></td>\n";
+                  echo "<a href=\"download.php?file=".$row[0]."\" target=\"_blank\">".$row[$i]."</a></td>\n";
                 } else {
                   echo $row[$i]."</td>\n";
                 }

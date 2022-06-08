@@ -124,3 +124,29 @@ function hideAddForm() {
   document.getElementById('btnAdd').style.display='inline';
   document.getElementById('btnHideAdd').style.display='none';  
 }
+
+//Code for Countdown on Closing window 
+//Time gets printed in a tag with id "CountDownTime"
+var stp;
+var countdownFrom; //time in seconds for countDown
+function CountDownStart(sec) {
+  countdownFrom = sec;
+  stp = setInterval("CountDownTimer('CountDownTime')",1000)
+}
+
+function CountDownTimer(id) {
+    if (countdownFrom==0) {
+      clearInterval(stp); window.close(); 
+    } else {
+      var x
+      var cntText = "Closing in "+countdownFrom+" seconds";
+      if (document.getElementById) {
+            x = document.getElementById(id);
+            x.innerHTML = cntText;
+      } else if (document.all) {
+            x = document.all[id];
+            x.innerHTML = cntText;
+      }
+    }
+    countdownFrom--
+}
