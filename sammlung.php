@@ -324,7 +324,8 @@ ul, #myUL {
               for($i = 0; $i<$res->numColumns(); $i++) {
                 echo "<td>";
                 if ($i==0) {
-                  echo "<a href=\"?delrow=".$row[0]."&table=".$name."&showtables\" class=\"text-danger\" role=\"button\">&times;</a>";
+                  //echo "<a href=\"?delrow=".$row[0]."&table=".$name."&showtables\" class=\"text-danger\" role=\"button\">&times;</a>";
+                  echo "<a onclick=\"setRowDeleteModal('".$row[0]."','".$name."');document.getElementById('confirmRowDelete').style.display='block'\" class=\"text-danger\" role=\"button\">&times;</a>";
                   echo "<a href=\"?changerow=".$row[0]."&table=".$name."\">".$row[0]."</a></td>\n";
                 } elseif ($_SESSION["zustand"] == Z_SHOWFILELIST && $res->columnName($i)=="name") {
                   echo "<a href=\"download.php?file=".$row[0]."\" target=\"_blank\">".$row[$i]."</a></td>\n";
@@ -465,6 +466,20 @@ ul, #myUL {
   include("footer.html");
 ?>
 
+<div id="confirmRowDelete" class="modal">
+  <span onclick="document.getElementById('confirmRowDelete').style.display='none'" class="close" title="Close Modal">&times;</span>
+  <form id="rowDeleteForm" class="modal-content" action="sammlung.php" method="get">
+    <div class="container">
+      <h1>Delete Row</h1>
+      <p id="rowDeleteFormText">Are you sure you want to delete Row # in Table tabel?</p>
+
+      <div class="clearfix">
+        <button type="button" class="cancelbtn" onclick="document.getElementById('confirmRowDelete').style.display='none'">Cancel</button>
+        <button id="confirmRowDeleteBtn" type="button" onclick="location.href='sammlung.php';" class="deletebtn">Delete</button>
+      </div>
+    </div>
+  </form>
+</div>
 <div class="modal fade" id="infoModal">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">

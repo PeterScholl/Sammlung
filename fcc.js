@@ -7,6 +7,15 @@ function init() {
   var duration = 20000; //20 seconds time for alert to disappear
   //setTimeout(function () { $('#alert').hide(); }, duration);
     setTimeout(function () {   if (document.getElementById("message_info")) { document.getElementById("message_info").style.display = "none"; } }, duration);
+  //Code for closing ConfirmDelRow-Modal by clicking outside the modal
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function(event) {
+    var modalConfirmRowDelete = document.getElementById('confirmRowDelete');
+    //console.log("var modal: "+modalConfirmRowDelete);
+    if (event.target == modalConfirmRowDelete) {
+      modalConfirmRowDelete.style.display = "none";
+    }
+  }
 }
 
 function loadDocGet(url, cFunction) {
@@ -150,3 +159,13 @@ function CountDownTimer(id) {
     }
     countdownFrom--
 }
+
+//Functions for ConfirmRowDelete-Modal
+function setRowDeleteModal(rowid, table) {
+  document.getElementById("rowDeleteFormText").innerHTML="Zeile "+rowid+" in Tabelle "+table+" wirklich l&ouml;schen?";
+  //document.getElementById("confirmRowDeleteBtn").onclick="location.href='?delrow="+rowid+"&table="+table+"&showtables'";
+  //document.getElementById("confirmRowDeleteBtn").innerHTML="Delete neu";
+  document.getElementById("confirmRowDeleteBtn").setAttribute('onclick','location.href="?delrow='+rowid+'&table='+table+'&showtables"');
+}
+
+
