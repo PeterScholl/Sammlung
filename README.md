@@ -11,3 +11,6 @@
 Wird genutzt als tool zur direkten Bearbeitung der SQLite-Datenbank
 https://sqlitebrowser.org/
 
+oder auch Anpassung der Tabellen nach folgender Webseite mit commandline-tool sqlite3
+https://www.techonthenet.com/sqlite/tables/alter_table.php
+
