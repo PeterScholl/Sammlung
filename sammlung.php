@@ -150,6 +150,7 @@ ul, #myUL {
         $filename = $_FILES['myfile']['name'];
         logdb("File uploaded: ".$filename);
         console_log("File to upload: ".$filename);
+        console_log_json($_FILES);
         // get the file extension
         $extension = pathinfo($filename, PATHINFO_EXTENSION);
         // the physical file on a temporary uploads directory on the server
@@ -159,9 +160,12 @@ ul, #myUL {
         $destination = UPLOADDIR.'/' . basename($file); //we keep the temporary name - original filename is stored in db
         console_log("  tmp_name: ".$file);
         console_log("  size: ".$size." - extension: ".$extension);
-        if (!in_array($extension, ['zip', 'pdf', 'docx'])) {
+        if ($_FILES['myfile']['error']>0) {         // check on error
+          console_log("   ERROR - Error on upload - nr: ".$_FILES['myfile']['error']. "- see https://www.php.net/manual/de/features.file-upload.errors.php for details");
+          $message_err = "Error - file too big or something else went wrong";
+        } elseif (!in_array($extension, ['zip', 'pdf', 'docx', 'jpg', 'gif', 'png'])) {
           console_log("   ERROR - Wrong file extension");
-          $message_err = "Your file extension must be .zip, .pdf or .docx";
+          $message_err = "Your file extension must be .zip, .pdf, .docx, .jpg, .gif or .png";
         } elseif ($_FILES['myfile']['size'] > MAXUPLOADFILESIZE) { // file shouldn't be larger than defined in config.php
           console_log("   ERROR - File too large > ".MAXUPLOADFILESIZE);
           $message_err = "Your file is too large. Max: ".MAXUPLOADFILESIZE;

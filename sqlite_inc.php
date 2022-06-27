@@ -203,8 +203,8 @@
     if($res=$db->querySingle($sql)) {
       $anz_upl=$res;
     } else {
-      console_log("  Error - no result");
-      $anz_upl = MAXUPLOADCOUNT+1;      
+      console_log("  (ERROR- but not really) no result means no uploads");
+      $anz_upl = 0;      
     }
     console_log("  there were ".$anz_upl." uploads during the last hour");
     return $anz_upl;
