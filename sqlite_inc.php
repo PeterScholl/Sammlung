@@ -384,7 +384,7 @@ EOF;
     // VersuchContainsObjekt
     checkTableExists("versuchCobjekt","CREATE TABLE versuchCobjekt (vid INTEGER, oid INTEGER, anzahl INTEGER);");
     // Files
-    checkTableExists("files","CREATE TABLE files (name TEXT, place TEXT, size INTEGER, downloads INTEGER, created TEXT, edited TEXT);");
+    checkTableExists("files","CREATE TABLE files (name TEXT, place TEXT, size INTEGER, downloads INTEGER, mimetype TEXT, created TEXT, edited TEXT);");
     if (file_exists(UPLOADDIR)) {
       console_log("DoChecks: upload dir exists (".UPLOADDIR.")");
       if (is_dir(UPLOADDIR)) {
@@ -450,10 +450,11 @@ EOF;
   function storeUploadedFileInDB($filename, $place, $size) {
     global $db;
     console_log("File in DB eintragen");
-    $stmt = $db->prepare('INSERT INTO files (name, place, size, downloads, created, edited) VALUES (:fname, :place, :size, 0,strftime("%Y-%m-%d %H:%M:%S","now"),strftime("%Y-%m-%d %H:%M:%S","now"))');
+    $stmt = $db->prepare('INSERT INTO files (name, place, size, downloads, mimetype, created, edited) VALUES (:fname, :place, :size, 0,:mimetype, strftime("%Y-%m-%d %H:%M:%S","now"),strftime("%Y-%m-%d %H:%M:%S","now"))');
     $stmt->bindValue(':size', $size, SQLITE3_INTEGER);
     $stmt->bindValue(':fname', $filename, SQLITE3_TEXT);
     $stmt->bindValue(':place', $place, SQLITE3_TEXT);
+    $stmt->bindValue(':mimetype', mime_content_type($place), SQLITE3_TEXT);
     console_log("  Statement: ".htmlspecialchars($stmt->getSQL(true)));
     $result = $stmt->execute();
     console_log("   Statement executed");
