@@ -122,6 +122,21 @@
     }    
     console_log("... verlasse addTableRow");
   }
+  //eine Zeile in einer Tabelle löschen / delete a row in a table
+  function delTableRow($table,$rowid) {
+    global $db;
+    console_log("Deleting: ".$rowid." from table ".$table);
+    if (ctype_alnum($table) && is_integer($rowid)) {
+      $stmt = $db->prepare('DELETE FROM '.$table.' WHERE rowid=:id');
+      $stmt->bindValue(':id', $rowid, SQLITE3_INTEGER);
+      //$stmt->bindValue(':table', $table, SQLITE3_TEXT);
+      $result = $stmt->execute();
+      return (true);
+    } else {
+      console_log("Unaccepted Values in DELETE - rowid: ".$rowid." table ".$table);
+      return(false);
+    }
+  }
   
   //einen bestimmten Wert in einer Tabelle ändern
   function updateTableRow($table, $rowid, $key, $value, $nocheck=false) {

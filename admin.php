@@ -80,8 +80,9 @@ EOF;
           //Change the specified option
           changeOptionWithID(filter_input(INPUT_GET, 'changerow', FILTER_VALIDATE_INT));
         }
-      }
-      
+      } else if (isset($_GET["checkFiles"])) { //hier soll die Konsistenz zwischen Dateien und Datenbank geprüft werden
+        $show='checkFiles';
+      } 
       if (isset($_GET["delrow"])) { //hier soll eine Tabellenzeile gelöscht werden
         $rowid = filter_input(INPUT_GET, 'delrow', FILTER_VALIDATE_INT);
         $tablename = trim(filter_input(INPUT_GET, 'table', FILTER_SANITIZE_STRING));
@@ -212,6 +213,9 @@ EOF;
         </li>
         <li class="nav-item">
           <a class="nav-link" href="uploadForm.php">Upload File</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="?checkFiles">Check Files and FileDB</a>
         </li>
         <li class="nav-item">
           <a class="nav-link disabled" href="#">.. to be continued ..</a>
@@ -355,6 +359,32 @@ EOF;
           </div>
         </form>
         <?php        
+      } else if ($show=='checkFiles') {
+        echo "<h1>Checking Files and Files-DB</h1><ul>";
+        echo "<a href=\"?checkFiles=true&withMimeType=true\">checkWithMime</a>";
+        $sql = "SELECT rowid,* FROM files;";
+        if ($res = $db->query($sql)) {
+          while($row = $res->fetchArray(SQLITE3_ASSOC)) {
+            if (!file_exists($row['place'])) {
+              echo "<li>".$row['name']." : ".$row['place']." does not exist - deleting table row";
+              if (delTableRow("files",$row['rowid'])) {
+                echo "-done </li>";
+              } else {
+                echo "-failed </li>";
+              }
+            } else {
+              echo "<li>".$row['name']." : ".$row['place']." exists";
+              if (isset($_GET['withMimeType'])) {
+                echo " - with MimeType ";
+                updateTableRow("files",$row['rowid'],"mimetype",mime_content_type($row['place']));
+              }
+              echo "</li>";
+            }
+          }
+        } else {
+          $message_err="Could not query filedb";
+        }
+        echo "</ul>";  
       }
     ?>
     </div>

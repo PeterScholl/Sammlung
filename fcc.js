@@ -165,7 +165,7 @@ function setRowDeleteModal(rowid, table) {
   document.getElementById("rowDeleteFormText").innerHTML="Zeile "+rowid+" in Tabelle "+table+" wirklich l&ouml;schen?";
   //document.getElementById("confirmRowDeleteBtn").onclick="location.href='?delrow="+rowid+"&table="+table+"&showtables'";
   //document.getElementById("confirmRowDeleteBtn").innerHTML="Delete neu";
-  document.getElementById("confirmRowDeleteBtn").setAttribute('onclick','location.href="?delrow='+rowid+'&table='+table+'&showtables"');
+  document.getElementById("confirmRowDeleteBtn").setAttribute('onclick','location.href="?delrow='+rowid+'&table='+table+'&show=files"');
 }
 
 

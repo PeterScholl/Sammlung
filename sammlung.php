@@ -102,7 +102,6 @@ ul, #myUL {
    //Open-and-prepare database
     require_once("sqlite_inc.php");
     doChecks();
-    console_log("File Path 1: ".getFilePathFromFileID(1));
 
    if(!$db) {
       echo $db->lastErrorMsg();
@@ -138,7 +137,28 @@ ul, #myUL {
         } else { //Neue Bordkarte konnte nicht erstellt werden
           $message_err = "Erstellen einer neuen Bordkarte nicht möglich - evtl. Maximum (".MAXBK.") überschritten";
         }
+      }
+      if (isset($_GET["delrow"])) { //hier soll eine Tabellenzeile gelöscht werden
+        $rowid = filter_input(INPUT_GET, 'delrow', FILTER_VALIDATE_INT);
+        $tablename = trim(filter_input(INPUT_GET, 'table', FILTER_SANITIZE_STRING));
+        //TODO: prüfen ob angemeldet
+        //TODO: prüfen ob Benutzer berechtigt ist
+        if ($tablename==="files") {
+          console_log("  ein File soll gelöscht werden - noch TODO");
+          
+          if (unlink(getFilePathFromFileID($rowid))) {
+            logdb("Fileid ".$rowid." - path: ".getFilePathFromFileID($rowid)." deleted");
+            delTableRow($tablename,$rowid);
+          } else {
+            $message_err="Could not delete file....";
+            logdb("ERROR Fileid ".$rowid." - path: ".getFilePathFromFileID($rowid)." could not be deleted");
+          }  
+        } else {
+          $message_err="Deletion not implemented or not possible";
+          logdb(" Deletion of row ".$rowid." from table ".$tablename." not allowed or not possible");
+        }
       } 
+ 
      }
     // Processing post-data when form is submitted
     // hier passiert auch ggf. eine Neuanmeldung
