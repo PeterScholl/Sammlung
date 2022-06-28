@@ -36,29 +36,79 @@
   if($_SERVER["REQUEST_METHOD"] == "GET") {
     if (isset($_GET["debug"])) {
       $debug=true;
+      debugTextOutput("Session-Info");
+      debugTextOutput(json_encode($_SESSION));
     }
-    if (isset($_GET["article"])) { //hier sollen alle Artikel zurückgeliefert werden
-      debugTextOutput("Artikel werden gelesen - Datenbank");
-      $retObj = getTableAsArray("article");
-    } else if (isset($_GET["shoplist"])) { // hier soll eine Einkaufsliste geliefert werden
-      debugTextOutput("Einkaufsliste wird gelesen: ".$_GET["shoplist"]);
-      $num = (int)$_GET["shoplist"];
-      if ($num!=-1) { //ausgewaehlte Liste holen
-        debugTextOutput("Liste mit Nummer ".$num." wird gelesen");
-        $retObj = getSingleTableRow('shoppinglist',$num);
-      } 
-      if ($retObj==false || $num==-1) { //neueste Liste holen
-        $retObj = getTableToSQL("SELECT rowid,*,MAX(strftime('%s',created)) AS created_seconds FROM shoppinglist;");
-      }  
-    } else if (isset($_GET["shoplistcontent"])) { // hier soll eine Einkaufsliste geliefert werden
-      debugTextOutput("Inhalt der Einkaufsliste wird gelesen: ".$_GET["shoplistcontent"]);
-      $num = (int)$_GET["shoplistcontent"];
-      $retObj = getTableToSQL("SELECT C.rowid AS id,A.name as name,C.amount as menge,".
-      "C.unit as einheit,A.rowid AS articleID, C.bought as bought FROM SLcontainsArticle AS C ".
-      "JOIN article AS A ON C.articleID=A.rowID where C.slID=".$num.";");
+    if (isset($_GET["genThumbnail"]) and isset($_GET["fileid"])) { //hier Thumbnails generiert werden
+      debugTextOutput("Generating thumbnail to fileid: ".$_GET["fileid"]);
+      $fileid = (int)$_GET["fileid"];
+      if (is_integer($fileid) and $fileid>0) {
+        debugTextOutput("fileid in Ordnung");
+        $row = getSingleTableRow("files",$fileid);
+        debugTextOutput("Row as json: ".json_encode($row));
+        if ($row) { //result erhalten
+          //TODO
+          $n_width = 200; //TODO default width of thumbnail
+          $add = $row['place'];
+          debugTextOutput("Ort: ".$row['place']);
+          $tsrc = "thumbnails/".basename($add);
+          if ($row['mimetype']=="image/gif"){
+              $im=imagecreatefromgif($add);
+              $width=ImageSx($im);              
+              $height=ImageSy($im);                  
+              $n_height=($n_width/$width) * $height; 
+              $newimage=imagecreatetruecolor($n_width,$n_height);
+              imageCopyResized($newimage,$im,0,0,0,0,$n_width,$n_height,$width,$height);
+              if (function_exists("imagegif")){
+                  Header("Content-type: image/gif");
+                  ImageGIF($newimage,$tsrc);
+              
+              }elseif(function_exists("imagejpeg")){
+                  Header("Content-type: image/jpeg");
+                  ImageJPEG($newimage,$tsrc);
+              }
+              chmod("$tsrc",0666);
+          } else if($row['mimetype']=="image/jpeg"){
+            try {
+              $im=imagecreatefromjpeg($add); 
+              $width=ImageSx($im);              
+              $height=ImageSy($im);         
+              debugTextOutput("Width: ".$width." Height: ".$height);    
+              $n_height=($n_width/$width) * $height;
+              $newimage=imagecreatetruecolor($n_width,$n_height);                 
+              imageCopyResized($newimage,$im,0,0,0,0,$n_width,$n_height,$width,$height);
+              ImageJpeg($newimage,$tsrc);
+              chmod("$tsrc",0666);
+              $retObj->resultText = "thumbnail generated: ".$tsrc;
+            } catch (Exception $e) {
+              $retObj->resultText = "thumbnail generation failed";
+            }
+          } else if($row['mimetype']=="image/png"){
+              $im=imagecreatefrompng($add); 
+              $width=ImageSx($im);              
+              $height=ImageSy($im);             
+              $n_height=($n_width/$width) * $height;
+              $newimage=imagecreatetruecolor($n_width,$n_height);                 
+              imageCopyResized($newimage,$im,0,0,0,0,$n_width,$n_height,$width,$height);
+              ImageJpeg($newimage,$tsrc);
+              chmod("$tsrc",0666);
+          } else {
+            $retObj->resultText = "File is no image";
+          }
+          $retObj->nextID = getNextID("files",$fileid);
+          
+        } else {
+          $retObj->error = "File-ID does not exist";
+          $retObj->nextID = getNextID("files",$fileid);
+        }
+      } else {
+        debugTextOutput("File id is no integer!!!");
+        $retObj->error = "File Id is no integer";
+      }
     } else if (isset($_GET["test"])) { // hier haben wir eine Testabfrage zum ausprobieren
       debugTextOutput("Testabfrage ausführen!!");
-      $retObj = getTableToSQL("SELECT rowid,*,MAX(strftime('%s',created)) AS created_seconds FROM shoppinglist;");
+      $retObj = getTableToSQL("SELECT rowid,*,MAX(strftime('%s',created)) AS created_seconds FROM files;");
+      $retObj = getNextID("files",120);
     }
   }
 

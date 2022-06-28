@@ -82,6 +82,8 @@ EOF;
         }
       } else if (isset($_GET["checkFiles"])) { //hier soll die Konsistenz zwischen Dateien und Datenbank geprüft werden
         $show='checkFiles';
+      } else if (isset($_GET["genThumbnails"])) { //Generate Thumbnails to all images
+        $show='genThumbnails'; 
       } 
       if (isset($_GET["delrow"])) { //hier soll eine Tabellenzeile gelöscht werden
         $rowid = filter_input(INPUT_GET, 'delrow', FILTER_VALIDATE_INT);
@@ -164,6 +166,7 @@ EOF;
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="./fcc.js"></script>
 </head>
 <body>
 
@@ -216,6 +219,9 @@ EOF;
         </li>
         <li class="nav-item">
           <a class="nav-link" href="?checkFiles">Check Files and FileDB</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="?genThumbnails">Generate Thumbnails</a>
         </li>
         <li class="nav-item">
           <a class="nav-link disabled" href="#">.. to be continued ..</a>
@@ -385,6 +391,13 @@ EOF;
           $message_err="Could not query filedb";
         }
         echo "</ul>";  
+      } else if ($show=='genThumbnails') {
+        //Button und Ausgabefeld
+        ?>
+        <h4>Generate Thumbnails</h4>
+        <button type="button" class="btn btn-primary" onclick="genThumbnailsWithLog(1)">Jetzt Thumbnails generieren</button>
+        <p id="genThumbnailsLog"></p>
+        <?php
       }
     ?>
     </div>

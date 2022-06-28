@@ -25,6 +25,28 @@ function loadDocGet(url, cFunction) {
   xhttp.send();
 }
 
+function genThumbnailsWithLog(nr=1) {
+  var daten = {};
+  loadDocGet("ajaxjsondata.php?genThumbnail=true&fileid="+nr, function(xhttp) {
+    //Daten erhalten
+    daten = JSON.parse(xhttp.responseText);
+    if (typeof daten.resultText !== 'undefined') {
+      $("#genThumbnailsLog").append(daten.resultText+"<br>");
+    }
+    if (typeof daten.error !== 'undefined') {
+      $("#genThumbnailsLog").append("ERROR:"+daten.error+"<br>");
+    }
+    $("#genThumbnailsLog").append("NextID:"+daten.nextID+"<br>");
+    console.log(JSON.stringify(daten));
+    if (typeof daten.nextID !== 'undefined' && daten.nextID>0) {
+      genThumbnailsWithLog(daten.nextID);
+    } else {
+      $("#genThumbnailsLog").append("Last file reached - generation DONE<br>");
+    }
+  })
+  console.log("Thumbnails - done: "+nr);
+}
+
 function holeDaten(listnum=-1) {
   holeArtikel();
   console.log("Daten der Einkaufsliste aus der DB holen - NR: "+listnum);

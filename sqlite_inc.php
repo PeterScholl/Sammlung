@@ -76,6 +76,22 @@
     return $result->fetchArray(SQLITE3_ASSOC);
   }
   
+  // getNextID in table or -1 if none
+  function getNextID($table, $rowid) {
+    global $db;
+    if (!ctype_alpha($table)) {
+      return -1;
+    }
+    $rownr = (int)$rowid;
+    $sql = "SELECT min(rowid) FROM ".$table." WHERE rowid>".$rownr.";";
+    $res = $db->querySingle($sql);
+    if ($res) {
+      return $res;
+    } else {
+      return -1;
+    }
+  }
+  
   //returns columnnames of an SQL-table as an Array
   function getColumnNames($tablename) {
     global $db;
