@@ -6,6 +6,7 @@
 * Ordner muss der Gruppe www-data gehören und schreibbar sein
 * Datenbank muss für die Gruppe schreibbar sein.
 * post_max_size und upload_max_size in php.ini (/etc/php/...) setzen
+* gd muss installiert sein für thumbnail creation (z.B. apt-get install php-gd)
 
 # SQlitebrowser
 Wird genutzt als tool zur direkten Bearbeitung der SQLite-Datenbank
