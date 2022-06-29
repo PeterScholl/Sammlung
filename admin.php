@@ -7,18 +7,6 @@
 
   require_once("config.php"); // konfiguration lesen
 
-    //Funktionen für Log-auf die Konsole
-    function console_log_json( $data ){
-        echo '<script>';
-        echo 'console.log('. json_encode( $data ) .')';
-        echo '</script>';
-    }
-    function console_log( $data ){
-      echo '<script>';
-      echo 'console.log("'. $data .'")';
-      echo '</script>';
-    }
-
     // Initialize the session
     session_start();
     // Check if the user is logged in, if not then redirect him to login page
