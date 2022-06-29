@@ -207,7 +207,7 @@
   function insertUpdateTheme($bezeichnung, $superthema, $rowid=-1) {
     global $db;
     if ($rowid>0) { //edit theme
-      
+      //TODO
     } else { // new theme
       if (strlen($bezeichnung)>0) {
         logdb("New Theme anlegen");
@@ -220,6 +220,30 @@
         $stmt->execute();
       } else { // String has length 0
         logdb("New Theme has length 0");
+        return -1;
+      }
+    }
+    return 0;
+  }
+
+  function insertUpdateObjekt($bezeichnung, $anzahl, $ort, $bild, $rowid=-1) {
+    global $db;
+    if ($rowid>0) { //edit objekt
+      //TODO
+    } else { // new objekt
+      if (strlen($bezeichnung)>0) {
+        logdb("generate new Objekt");
+        //TODO check if superthema is integer and exists
+        
+        $stmt = $db->prepare('INSERT INTO objekt (bezeichnung,anzahl,ortID,bild,created,edited) VALUES (:bez, :anz, :ort, :bild, strftime("%Y-%m-%d %H:%M:%S","now"),strftime("%Y-%m-%d %H:%M:%S","now"));');
+        $stmt->bindValue(':bez', $bezeichnung, SQLITE3_TEXT);
+        $stmt->bindValue(':anz', $anzahl, SQLITE3_INTEGER);
+        $stmt->bindValue(':ort', $ort, SQLITE3_INTEGER);
+        $stmt->bindValue(':bild', $bild, SQLITE3_INTEGER);
+        logdb("  Statement to execute: ".htmlspecialchars($stmt->getSQL(true)));
+        $stmt->execute();
+      } else { // String has length 0
+        logdb("New Objekt has length 0");
         return -1;
       }
     }

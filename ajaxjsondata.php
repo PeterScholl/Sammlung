@@ -137,6 +137,22 @@
         $retObj->error = "Invalid File-ID";
         $retObj->nextID = -1;
       }
+    } else if (isset($_GET["insObjekt"])) {
+      //TODO check if user is logged in and allowed to do or admin logged in 
+      //TODO Validate input fields
+      $id = (int)$_GET["objid"];  // numeric 
+      $bez = $_GET["bez"];   // String - text
+      $anz = (int)$_GET["anz"];   // numeric
+      $ort = (int)$_GET["ortid"]; // numeric
+      $bild = (int)$_GET["bildid"]; //number
+      debugTextOutput("Insert or Edit Objekt");
+      if (is_integer($anz)) {
+        if (insertUpdateObjekt($bez,$anz,$ort,$bild)>=0) {
+          $retObj->resultText = "done";
+        } else {
+          $retObj->resultText = "failed";
+        }
+      }
     } else if (isset($_GET["test"])) { // hier haben wir eine Testabfrage zum ausprobieren
       debugTextOutput("Testabfrage ausführen!!");
       $retObj = getTableToSQL("SELECT rowid,*,MAX(strftime('%s',created)) AS created_seconds FROM files;");

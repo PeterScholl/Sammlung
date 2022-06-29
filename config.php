@@ -10,4 +10,20 @@
   define("HOMEPAGE", "sammlung.php"); // Initial home-Page
   define("UPLOADDIR", "uploads"); //directory for uploads
   
+  //Funktionen für Log-auf die Konsole
+  function console_log_json( $data ){
+    if (DEBUG) {
+      echo '<script>';
+      echo 'console.log('. json_encode( $data ) .')';
+      echo '</script>';
+    }
+  }
+  function console_log( $data ){
+    if (DEBUG) {
+      echo '<script>';
+      echo 'console.log("'. $data .'")';
+      echo '</script>';
+    }
+  }
+
 ?>

@@ -66,21 +66,6 @@ ul, #myUL {
 </head>
 <?php
    
-    //Funktionen für Log-auf die Konsole
-    function console_log_json( $data ){
-      if (DEBUG) {
-        echo '<script>';
-        echo 'console.log('. json_encode( $data ) .')';
-        echo '</script>';
-      }
-    }
-    function console_log( $data ){
-      if (DEBUG) {
-        echo '<script>';
-        echo 'console.log("'. $data .'")';
-        echo '</script>';
-      }
-    }
     
     //session_destroy();
     console_log("Session-ID: ".session_id());
@@ -95,6 +80,7 @@ ul, #myUL {
     define("Z_UPLOADDIALOGUE",3); //show upload dialogue
     define("Z_SHOWFILELIST",4);
     define("Z_EDITTHEME",5); //edit or add themes
+    define("Z_INSERTOBJ",6); //insert Obj themes
     if (!isset($_SESSION["zustand"])) {
       $_SESSION["zustand"] = Z_SHOWTHEMEN;
     }
@@ -129,6 +115,9 @@ ul, #myUL {
         } else if($_GET["show"]==="edittheme") {
           console_log("Theme should be edited or added");
           $_SESSION["zustand"] = Z_EDITTHEME;  
+        } else if($_GET["show"]==="insertObj") {
+          console_log("Object should be added");
+          $_SESSION["zustand"] = Z_INSERTOBJ;  
         }    
       }
       if (isset($_GET["neueBK"])) { //hier soll eine neue Bordkarte erzeugt werden
@@ -273,6 +262,7 @@ ul, #myUL {
         <div class="dropdown-menu">
           <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=upload">Upload</a>
           <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=edittheme">Thema anlegen</a>
+          <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=insertObj">Objekt anlegen</a>
         </div>
       </li>
       <!-- Admin und Info -->
@@ -443,6 +433,43 @@ ul, #myUL {
               <button type="submit" class="btn btn-primary" id="edittheme" name="edittheme">Submit</button>
             </div>
           </form>
+        </div>
+        <?php
+      } else if ($_SESSION["zustand"] ==Z_INSERTOBJ) {
+        // Objekt anlegen (TODO: oder später auch Editieren?!)
+        if (isset($_GET["editid"])) { 
+          //Objekt soll editiert werden
+          $editid = intval($_GET["editid"]);
+        } else {
+          // Objekt wird neu angelegt
+        }
+        ?>
+        <h5>Objekt editieren oder anlegen</h5>
+        <div id="EditOrAddObject" class="form-group">
+          <form name="EditOrAddObject" class="form" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+            <?php echo '<input type="hidden" name="editid" value="'.$editid.'">'; ?>
+            <div class="form-row">
+              <label for="bezeichnung" class="mt-2 mb-0">Bezeichnung</label>
+              <input type="text" class="form-control" placeholder="<?php echo $bezvorgabe; ?>" name="bezeichnung">
+            </div>
+            <div class="form-row">
+              <label for="anzahl" class="mt-2 mb-0">Anzahl</label>
+              <input type="text" class="form-control" value="1" name="anzahl">
+            </div>
+            <div class="form-row">
+              <label for="ort" class="mt-2 mb-0">Ort</label>
+              <input type="text" class="form-control" placeholder="Wo" name="ort">
+            </div>
+            <div class="form-row">
+              <label for="bild" class="mt-2 mb-0">Bild</label>
+              <input type="text" class="form-control" placeholder="Keins" name="bild">
+            </div>
+            <div class="form-row mt-2">
+              <button type="submit" class="btn btn-primary" id="insertobj" name="insertobj">Submit</button>
+              <button type="button" class="btn btn-primary" onclick="insertEditObjekt()">JS Submit</button>
+            </div>
+          </form>
+          <p id="insertObjResult"></p>
         </div>
         <?php
       } else {

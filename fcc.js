@@ -25,7 +25,7 @@ function loadDocGet(url, cFunction) {
   xhttp.send();
 }
 
-function genThumbnailsWithLog(nr=1) {
+function genThumbnailsWithLog(nr=1,recursive=true) {
   var daten = {};
   if (nr==1) $("#wartungsoutput").html("<br>Generating thumbnails<br>");  
   loadDocGet("ajaxjsondata.php?genThumbnail=true&fileid="+nr, function(xhttp) {
@@ -39,7 +39,7 @@ function genThumbnailsWithLog(nr=1) {
     }
     $("#wartungsoutput").append("NextID:"+daten.nextID+"<br>");
     console.log(JSON.stringify(daten));
-    if (typeof daten.nextID !== 'undefined' && daten.nextID>0) {
+    if (typeof daten.nextID !== 'undefined' && daten.nextID>0 && recursive) {
       genThumbnailsWithLog(daten.nextID);
     } else {
       $("#wartungsoutput").append("Last file reached - generation DONE<br>");
@@ -48,7 +48,7 @@ function genThumbnailsWithLog(nr=1) {
   console.log("Thumbnails - done: "+nr);
 }
 
-function checkFilesWithLog(nr=1,withMime=false) {
+function checkFilesWithLog(nr=1,withMime=false, recursive=true) {
   var daten = {};
   if (nr==1) $("#wartungsoutput").html("<br>Checking Files<br>withMime: "+withMime+"<br>");  
   loadDocGet("ajaxjsondata.php?checkFiles=true&fileid="+nr+"&withMimeType="+withMime, function(xhttp) {
@@ -62,13 +62,44 @@ function checkFilesWithLog(nr=1,withMime=false) {
     }
     $("#wartungsoutput").append("NextID:"+daten.nextID+"<br>");
     console.log(JSON.stringify(daten));
-    if (typeof daten.nextID !== 'undefined' && daten.nextID>0) {
+    if (typeof daten.nextID !== 'undefined' && daten.nextID>0 && recursive) {
       checkFilesWithLog(nr=daten.nextID,withMime=withMime);
     } else {
       $("#wartungsoutput").append("Last file reached - checks DONE<br>");
     }
   })
   console.log("FileCheck - done: "+nr);
+}
+
+function insertEditObjekt() {
+  var daten = {};
+  //Daten aus der Form holen
+  let bez = document.forms["EditOrAddObject"]["bezeichnung"].value;
+  let editid = document.forms["EditOrAddObject"]["editid"].value;
+  let anz = document.forms["EditOrAddObject"]["anzahl"].value;
+  let ort = document.forms["EditOrAddObject"]["ort"].value;
+  let bild = document.forms["EditOrAddObject"]["bild"].value;
+  let resultField = document.getElementById("insertObjResult");
+  //TODO TODO - Modal anzeigen, je nach ergebnis
+  if (lettersNumbersCheck(bez)) {
+    console.log("Open ajaxjsondata.php?insObjekt&editid="+editid+"&bez="+bez+"&anz="+anz+"&ort="+ort+"&bild="+bild);
+    loadDocGet("ajaxjsondata.php?insObjekt&editid="+editid+"&bez="+bez+"&anz="+anz+"&ort="+ort+"&bild="+bild, function(xhttp) {
+      //Daten erhalten
+      daten = JSON.parse(xhttp.responseText);
+      console.log(JSON.stringify(daten));
+      if (typeof daten.resultText !== 'undefined') {
+        $("#insertObjResult").append(daten.resultText+"<br>");
+      }
+      if (typeof daten.error !== 'undefined') {
+        $("#insertObjResult").append("ERROR:"+daten.error+"<br>");
+      }
+    })
+    resultField.innerHTML = "ok ";
+  } else {
+    resultField.innerHTML = "failure ";
+  }
+  resultField.innerHTML += "Bezeichner: "+bez+" Ort: "+ort+" EditId: "+editid;
+  //alert("Got Bezeichner: "+bez+" editid: "+editid+" Anzahl: "+anz);  
 }
 
 function holeDaten(listnum=-1) {
@@ -204,6 +235,20 @@ function CountDownTimer(id) {
       }
     }
     countdownFrom--
+}
+
+function lettersNumbersCheck(name)
+{
+   var regEx = /^[0-9a-zA-Z\-\_\.]+$/;
+   if(name.match(regEx))
+     {
+      return true;
+     }
+   else
+     {
+     alert("Please enter letters, numbers, ., _ and - only.");
+     return false;
+     }
 }
 
 //Functions for ConfirmRowDelete-Modal
