@@ -82,8 +82,8 @@ EOF;
         }
       } else if (isset($_GET["checkFiles"])) { //hier soll die Konsistenz zwischen Dateien und Datenbank geprüft werden
         $show='checkFiles';
-      } else if (isset($_GET["genThumbnails"])) { //Generate Thumbnails to all images
-        $show='genThumbnails'; 
+      } else if (isset($_GET["wartung"])) { //Generate Thumbnails to all images
+        $show='wartung'; 
       } 
       if (isset($_GET["delrow"])) { //hier soll eine Tabellenzeile gelöscht werden
         $rowid = filter_input(INPUT_GET, 'delrow', FILTER_VALIDATE_INT);
@@ -221,7 +221,7 @@ EOF;
           <a class="nav-link" href="?checkFiles">Check Files and FileDB</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="?genThumbnails">Generate Thumbnails</a>
+          <a class="nav-link" href="?wartung">Wartungsmen&uuml;</a>
         </li>
         <li class="nav-item">
           <a class="nav-link disabled" href="#">.. to be continued ..</a>
@@ -391,12 +391,14 @@ EOF;
           $message_err="Could not query filedb";
         }
         echo "</ul>";  
-      } else if ($show=='genThumbnails') {
-        //Button und Ausgabefeld
+      } else if ($show=='wartung') {
+        //Buttons und Ausgabefeld
         ?>
-        <h4>Generate Thumbnails</h4>
+        <h4>Wartungsoptionen</h4>
         <button type="button" class="btn btn-primary" onclick="genThumbnailsWithLog(1)">Jetzt Thumbnails generieren</button>
-        <p id="genThumbnailsLog"></p>
+        <button type="button" class="btn btn-primary" onclick="checkFilesWithLog(1,withMime=false)">Files pr&uuml;fen</button>
+        <button type="button" class="btn btn-primary" onclick="checkFilesWithLog(1,withMime=true)">Files pr&uuml;fen - MimeType in DB generieren</button>
+        <p id="wartungsoutput"></p>
         <?php
       }
     ?>

@@ -105,6 +105,38 @@
         debugTextOutput("File id is no integer!!!");
         $retObj->error = "File Id is no integer";
       }
+    } else if (isset($_GET["checkFiles"]) and isset($_GET["fileid"])) { 
+      //check if Files in DB exist
+      debugTextOutput("Checking Files and Files-DB");
+      $fileid = (int)$_GET["fileid"];
+      if (is_integer($fileid) and $fileid>0) {
+        debugTextOutput("fileid in Ordnung");
+        $row = getSingleTableRow("files",$fileid);
+        debugTextOutput("Row as json: ".json_encode($row));
+        if ($row) { //result erhalten
+          if (!file_exists($row['place'])) {
+            $retObj->resultText = $row['name']." : ".$row['place']." does not exist - deleting table row";
+            if (delTableRow("files",$row['rowid'])) {
+              $retObj->resultText .= "-done";
+            } else {
+              $retObj->resultText .= "-failed";
+            }
+          } else {
+            $retObj->resultText = $row['name']." : ".$row['place']." exists";
+            if (isset($_GET['withMimeType']) and $_GET['withMimeType']=="true") {
+              $retObj->resultText .= "- with MimeType ";
+              updateTableRow("files",$row['rowid'],"mimetype",mime_content_type($row['place']));
+            }
+          }
+        } else {
+          $retObj->resultText = "File does not exist in DB";
+        }
+        $retObj->nextID = getNextID("files",$fileid);
+      } else {
+        $retObj->resultText = "Invalid File-ID";
+        $retObj->error = "Invalid File-ID";
+        $retObj->nextID = -1;
+      }
     } else if (isset($_GET["test"])) { // hier haben wir eine Testabfrage zum ausprobieren
       debugTextOutput("Testabfrage ausführen!!");
       $retObj = getTableToSQL("SELECT rowid,*,MAX(strftime('%s',created)) AS created_seconds FROM files;");

@@ -27,24 +27,48 @@ function loadDocGet(url, cFunction) {
 
 function genThumbnailsWithLog(nr=1) {
   var daten = {};
+  if (nr==1) $("#wartungsoutput").html("<br>Generating thumbnails<br>");  
   loadDocGet("ajaxjsondata.php?genThumbnail=true&fileid="+nr, function(xhttp) {
     //Daten erhalten
     daten = JSON.parse(xhttp.responseText);
     if (typeof daten.resultText !== 'undefined') {
-      $("#genThumbnailsLog").append(daten.resultText+"<br>");
+      $("#wartungsoutput").append(daten.resultText+"<br>");
     }
     if (typeof daten.error !== 'undefined') {
-      $("#genThumbnailsLog").append("ERROR:"+daten.error+"<br>");
+      $("#wartungsoutput").append("ERROR:"+daten.error+"<br>");
     }
-    $("#genThumbnailsLog").append("NextID:"+daten.nextID+"<br>");
+    $("#wartungsoutput").append("NextID:"+daten.nextID+"<br>");
     console.log(JSON.stringify(daten));
     if (typeof daten.nextID !== 'undefined' && daten.nextID>0) {
       genThumbnailsWithLog(daten.nextID);
     } else {
-      $("#genThumbnailsLog").append("Last file reached - generation DONE<br>");
+      $("#wartungsoutput").append("Last file reached - generation DONE<br>");
     }
   })
   console.log("Thumbnails - done: "+nr);
+}
+
+function checkFilesWithLog(nr=1,withMime=false) {
+  var daten = {};
+  if (nr==1) $("#wartungsoutput").html("<br>Checking Files<br>withMime: "+withMime+"<br>");  
+  loadDocGet("ajaxjsondata.php?checkFiles=true&fileid="+nr+"&withMimeType="+withMime, function(xhttp) {
+    //Daten erhalten
+    daten = JSON.parse(xhttp.responseText);
+    if (typeof daten.resultText !== 'undefined') {
+      $("#wartungsoutput").append(daten.resultText+"<br>");
+    }
+    if (typeof daten.error !== 'undefined') {
+      $("#wartungsoutput").append("ERROR:"+daten.error+"<br>");
+    }
+    $("#wartungsoutput").append("NextID:"+daten.nextID+"<br>");
+    console.log(JSON.stringify(daten));
+    if (typeof daten.nextID !== 'undefined' && daten.nextID>0) {
+      checkFilesWithLog(nr=daten.nextID,withMime=withMime);
+    } else {
+      $("#wartungsoutput").append("Last file reached - checks DONE<br>");
+    }
+  })
+  console.log("FileCheck - done: "+nr);
 }
 
 function holeDaten(listnum=-1) {
