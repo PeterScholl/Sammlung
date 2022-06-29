@@ -147,7 +147,7 @@
       $bild = (int)$_GET["bildid"]; //number
       debugTextOutput("Insert or Edit Objekt");
       if (is_integer($anz)) {
-        if (insertUpdateObjekt($bez,$anz,$ort,$bild)>=0) {
+        if (insertUpdateObjekt($bez,$anz,$bild)>=0) {
           $retObj->resultText = "done";
         } else {
           $retObj->resultText = "failed";

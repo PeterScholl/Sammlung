@@ -128,12 +128,12 @@
     console_log("strval:".$strval);
     if (strlen($strcol)>0) {
       $sql = "INSERT INTO ".$table." (".substr($strcol,0,-1).") VALUES (".substr($strval,0,-1).");";
-      console_log("Zeile wird eingetragen: ".$sql);
+      console_log("Zeile wird eingetragen: ".htmlspecialchars($sql));
       $ret = $db->exec($sql);
       if(!$ret) {
         echo $db->lastErrorMsg();
       } else {
-        console_log("enable_options eingetragen");
+        console_log("Zeile wurde eingetragen");
       }
     }    
     console_log("... verlasse addTableRow");
@@ -203,6 +203,41 @@
       logdb("Error on fetching result");
     }
   }
+
+  //rekursiv Orteliste ausgeben
+  function printOrteListeAsUL($id, $tiefe = 0) {
+    //check if $id is Integer
+    if (! is_int($id)) { return; }
+    global $db;
+    $sql = "SELECT rowid, bezeichnung FROM ort WHERE superort=".$id." ORDER BY sort;";
+    logdb("sqlite_inc - printOrteListeAsUL - SQL: ".$sql);
+    $result = $db->query($sql);
+    if ($result) { // Success
+      if ($result->numColumns() && $result->columnType(0) != SQLITE3_NULL) {
+        // have rows
+        if ($tiefe==0) { echo "<UL>"; } else { echo "<UL class=\"nested\">"; }
+        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+          // check if there are subitems of this item
+          $sql = "SELECT * FROM ort WHERE superort=".$row["rowid"].";";
+          if ($db->querySingle($sql)) {
+            //yes there are subitems
+            echo "<li><span class=\"caret\">".$row["bezeichnung"]."</span>";
+            printOrteListeAsUL($row["rowid"], $tiefe=$tiefe+1);
+            echo "</li>";
+          } else {
+            //there are no subitems
+            echo "<li>".$row["bezeichnung"]."</li>";
+          }
+        }
+        echo "</UL>";
+      } else {
+        // zero rows - Nothing to do!
+        logdb("sqlite_inc - printOrteListeAsUL - no rows - should not happen!");
+      } 
+    } else {
+      logdb("Error on fetching result");
+    }
+  }
   
   function insertUpdateTheme($bezeichnung, $superthema, $rowid=-1) {
     global $db;
@@ -226,7 +261,7 @@
     return 0;
   }
 
-  function insertUpdateObjekt($bezeichnung, $anzahl, $ort, $bild, $rowid=-1) {
+  function insertUpdateObjekt($bezeichnung, $anzahl, $bild, $rowid=-1) {
     global $db;
     if ($rowid>0) { //edit objekt
       //TODO
@@ -235,10 +270,9 @@
         logdb("generate new Objekt");
         //TODO check if superthema is integer and exists
         
-        $stmt = $db->prepare('INSERT INTO objekt (bezeichnung,anzahl,ortID,bild,created,edited) VALUES (:bez, :anz, :ort, :bild, strftime("%Y-%m-%d %H:%M:%S","now"),strftime("%Y-%m-%d %H:%M:%S","now"));');
+        $stmt = $db->prepare('INSERT INTO objekt (bezeichnung,anzahl,bild,created,edited) VALUES (:bez, :anz, :bild, strftime("%Y-%m-%d %H:%M:%S","now"),strftime("%Y-%m-%d %H:%M:%S","now"));');
         $stmt->bindValue(':bez', $bezeichnung, SQLITE3_TEXT);
         $stmt->bindValue(':anz', $anzahl, SQLITE3_INTEGER);
-        $stmt->bindValue(':ort', $ort, SQLITE3_INTEGER);
         $stmt->bindValue(':bild', $bild, SQLITE3_INTEGER);
         logdb("  Statement to execute: ".htmlspecialchars($stmt->getSQL(true)));
         $stmt->execute();
@@ -427,13 +461,11 @@ EOF;
        }
     }
     // Objekt
-    checkTableExists("objekt","CREATE TABLE objekt (bezeichnung TEXT, anzahl INTEGER DEFAULT 1, ortID INTEGER DEFAULT -1, bild TEXT DEFAULT NULL, sort INTEGER, created TEXT, edited TEXT);");
-    // Schrank
-    checkTableExists("schrank","CREATE TABLE schrank (bezeichnung TEXT, raum TEXT);");
+    checkTableExists("objekt","CREATE TABLE objekt (bezeichnung TEXT, anzahl INTEGER DEFAULT 1, bild TEXT DEFAULT NULL, sort INTEGER, created TEXT, edited TEXT);");
     // Ort
-    checkTableExists("ort","CREATE TABLE ort (schrank INTEGER, fach INTEGER, bezeichnung TEXT DEFAULT '');");
-    // Datei
-    checkTableExists("datei","CREATE TABLE datei (bezeichnung TEXT, pfad TEXT);");
+    checkTableExists("ort","CREATE TABLE ort (bezeichnung TEXT, superort INTEGER DEFAULT -1, sort INTEGER, created TEXT, edited TEXT);");
+    // ObjektIstAmOrt
+    checkTableExists("objektAnOrt","CREATE TABLE objektAnOrt (objektID INTEGER NOT NULL, ortID INTEGER NOT NULL, anzahl NOT NULL, created TEXT, edited TEXT);");
     // Versuch
     checkTableExists("versuch","CREATE TABLE versuch (bezeichnung TEXT);");
     // VersuchContainsObjekt

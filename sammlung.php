@@ -77,6 +77,7 @@ ul, #myUL {
     // Zustände
     define("Z_SHOWTHEMEN",2);  //Themenübersicht anzeigen
     define("Z_SHOWOBJEKTELIST",1);
+    define("Z_SHOWORTE",7);  //Orte anzeigen
     define("Z_UPLOADDIALOGUE",3); //show upload dialogue
     define("Z_SHOWFILELIST",4);
     define("Z_EDITTHEME",5); //edit or add themes
@@ -103,6 +104,9 @@ ul, #myUL {
         if($_GET["show"]==="themen") {
           console_log("Themen werden angezeigt");
           $_SESSION["zustand"] = Z_SHOWTHEMEN;
+        } else if($_GET["show"]==="orte") {
+          console_log("Orte werden angezeigt");
+          $_SESSION["zustand"] = Z_SHOWORTE;
         } else if($_GET["show"]==="objekte") {
           console_log("Objekte werden angezeigt");
           $_SESSION["zustand"] = Z_SHOWOBJEKTELIST;
@@ -250,6 +254,7 @@ ul, #myUL {
         </a>
         <div class="dropdown-menu">
           <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=themen">Themen</a>
+          <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=orte">Orte</a>
           <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=objekte">Objekte</a>
           <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=files">Files</a>
         </div>
@@ -308,10 +313,6 @@ ul, #myUL {
       // Evtl. treeview ala https://www.w3schools.com/howto/howto_js_treeview.asp
       if ($_SESSION["zustand"] == Z_SHOWOBJEKTELIST || $_SESSION["zustand"] == Z_SHOWFILELIST) {
         switch($_SESSION["zustand"]) {
-          case Z_SHOWTHEMEN:
-            echo '<h5 id="tblname">Themen&uuml;bersicht</h5>';
-            $name = "themenfelder";
-            break;
           case Z_SHOWFILELIST:
             echo '<h5 id="tblname">Files</h5>';
             $name = "files";
@@ -389,6 +390,24 @@ ul, #myUL {
           $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
         });
         </script>       
+        <?php
+      } else if ($_SESSION["zustand"] ==Z_SHOWORTE) {
+        // Zustand Orte anzeigen
+        echo '<h5 id="tblname">&Uuml;bersicht Orte</h5>';
+        //generate as nested unordered list
+        printOrteListeAsUL(-1);
+        ?>
+        <script>
+        var toggler = document.getElementsByClassName("caret");
+        var i;
+
+        for (i = 0; i < toggler.length; i++) {
+          toggler[i].addEventListener("click", function() {
+            this.parentElement.querySelector(".nested").classList.toggle("active");
+            this.classList.toggle("caret-down");
+          });
+        }
+        </script>
         <?php
       } else if ($_SESSION["zustand"] ==Z_EDITTHEME) {
         // Thema editieren oder anlegen

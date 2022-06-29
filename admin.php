@@ -316,7 +316,8 @@ EOF;
                 <label><?php echo $key; ?></label>
               </div>
               <div class="col">
-                <input type="text" name="<?php echo $key; ?>" value="">
+                <input type="text" name="<?php echo $key; ?>" value="<?php
+                if ($key=='created' or $key=='edited') echo date("Y-m-d H:i:s", time()); ?>">
               </div>
             </div>
             <?php }
