@@ -72,7 +72,10 @@ EOF;
         $show='checkFiles';
       } else if (isset($_GET["wartung"])) { //Generate Thumbnails to all images
         $show='wartung'; 
-      } 
+      } else if (isset($_GET["checkOrtOrder"])) { // Ort-order updaten
+        checkOrtOrder();
+        $show='tables';
+      }
       if (isset($_GET["delrow"])) { //hier soll eine Tabellenzeile gelöscht werden
         $rowid = filter_input(INPUT_GET, 'delrow', FILTER_VALIDATE_INT);
         $tablename = trim(filter_input(INPUT_GET, 'table', FILTER_SANITIZE_STRING));
@@ -383,11 +386,13 @@ EOF;
       } else if ($show=='wartung') {
         //Buttons und Ausgabefeld
         ?>
-        <h4>Wartungsoptionen</h4>
+        <h4>Wartungsoptionen (Javascript)</h4>
         <button type="button" class="btn btn-primary" onclick="genThumbnailsWithLog(1)">Jetzt Thumbnails generieren</button>
         <button type="button" class="btn btn-primary" onclick="checkFilesWithLog(1,withMime=false)">Files pr&uuml;fen</button>
         <button type="button" class="btn btn-primary" onclick="checkFilesWithLog(1,withMime=true)">Files pr&uuml;fen - MimeType in DB generieren</button>
         <p id="wartungsoutput"></p>
+        <h4>Wartungsoptionen (php-Links)</h4>
+        <a href="?checkOrtOrder">Pr&uuml;fe Sortierung in Tabelle Orte</a>
         <?php
       }
     ?>

@@ -472,20 +472,35 @@ ul, #myUL {
               <input type="text" class="form-control" placeholder="<?php echo $bezvorgabe; ?>" name="bezeichnung">
             </div>
             <div class="form-row">
-              <label for="anzahl" class="mt-2 mb-0">Anzahl</label>
-              <input type="text" class="form-control" value="1" name="anzahl">
+              <label for="anzahl" class="mt-2 mb-0">Anzahl (wenn gr&ouml;&szlig;er 0 wird auch der Ort eingetragen)</label>
+              <input type="text" class="form-control" value="0" name="anzahl">
             </div>
             <div class="form-row">
               <label for="ort" class="mt-2 mb-0">Ort</label>
-              <input type="text" class="form-control" placeholder="Wo" name="ort">
+              <!-- <input type="text" class="form-control" placeholder="Wo" name="ort"> -->
+              <select class="form-control" name="ort" id="ort">
+                <?php
+                printOrteAsSelection();
+                ?>
+              </select>
             </div>
             <div class="form-row">
-              <label for="bild" class="mt-2 mb-0">Bild</label>
-              <input type="text" class="form-control" placeholder="Keins" name="bild">
-            </div>
+              <label for="bildfile" class="mt-2 mb-0">Bild</label>
+              <div class="custom-file">
+                <input type="file" class="custom-file-input" id="customFile" name="bildfile">
+                <label class="custom-file-label" for="customFile">Datei waehlen oder leer lassen</label>
+              </div>
+              <script>
+              // the following code makes the name of the file appear on select
+              $(".custom-file-input").on("change", function() {
+                var fileName = $(this).val().split("\\").pop();
+                $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+              });
+              </script>
+            </div>       
             <div class="form-row mt-2">
-              <button type="submit" class="btn btn-primary" id="insertobj" name="insertobj">Submit</button>
-              <button type="button" class="btn btn-primary" onclick="insertEditObjekt()">JS Submit</button>
+              <button type="submit" class="btn btn-primary mr-2" id="insertobj" name="insertobj">Mit Bild</button>
+              <button type="button" class="btn btn-primary" onclick="insertEditObjekt()">Ohne Bild</button>
             </div>
           </form>
           <p id="insertObjResult"></p>

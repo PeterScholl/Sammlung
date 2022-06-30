@@ -261,6 +261,66 @@
     return 0;
   }
 
+  function getStringToOrtId($id) {
+    if ($id==-1) return "";
+    global $db;
+    if (is_int($id)) {
+      $sql = "SELECT bezeichnung,superort FROM ort where rowid=".$id.";";
+      logdb("SQL: ".$sql);
+      if($res=$db->querySingle($sql,$entireRow=true)) {
+        logdb("  Success - result: ".$res);
+        if ($res['superort']==-1) return $res['bezeichnung'];
+        return getStringToOrtId($res['superort'])."/".$res['bezeichnung'];
+      } else {
+        logdb("  Error - no result");
+        return "";
+      }
+    }
+    return $path;   
+  }
+
+  function checkOrtOrder($sup=-1,$nextval=1) {
+    global $db;
+    if ($sup==-1) logdb("generating new Sorting of Table ort");
+    $stmt = $db->prepare('SELECT rowid,* FROM ort WHERE superort=:sup ORDER BY sort ASC;');
+    $stmt->bindValue(':sup', $sup, SQLITE3_INTEGER);
+    logdb("  Statement to execute: ".htmlspecialchars($stmt->getSQL(true)));
+    $result = $stmt->execute();
+    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+      //$sql = "UPDATE TABLE ort SET sort=".$nextval." WHERE rowid=".$row['rowid'].";";
+      updateTableRow("ort",$row['rowid'], "sort", $nextval,$nocheck=true);
+      $nextval=($nextval+5)-($nextval%5);
+      $nextval = checkOrtOrder($sup=$row['rowid'],$nextval=$nextval);
+      
+    }
+    return $nextval;
+  }
+  
+  function printOrteAsSelection() {
+    echo "<option value=\"-1\">Keiner</option>";
+    global $db;
+    $depthlist = array();
+    array_push($depthlist,-1);
+    $pre = "";
+    $lastsup = -1;
+    $stmt = $db->prepare('SELECT rowid,bezeichnung,superort FROM ort ORDER BY sort ASC;');
+    logdb("  Statement to execute: ".htmlspecialchars($stmt->getSQL(true)));
+    $result = $stmt->execute();
+    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+      if ($row['superort']!=$lastsup) { // change of depth
+        while (in_array($row['superort'], $depthlist)) { // Rücksprung auf alte ebene
+          array_pop($depthlist);
+        }
+        array_push($depthlist, $row['superort']);
+        $pre = $pre."-";
+        $pre = substr($pre,0,count($depthlist)-1);
+        $lastsup=$row['superort'];
+        console_log_json($depthlist);
+      }
+      echo "<option value=\"".$row['rowid'].($row['rowid']==$_SESSION['aktort']?" selected":"")."\">".$pre.$row['bezeichnung']."</option>";
+    }
+  }
+  
   function insertUpdateObjekt($bezeichnung, $anzahl, $bild, $rowid=-1) {
     global $db;
     if ($rowid>0) { //edit objekt
@@ -315,6 +375,7 @@
     }
     return $path;
   }
+  
   // get FileName from file - id
   function getFileNameFromFileID($id) {
     global $db;

@@ -157,6 +157,7 @@
       debugTextOutput("Testabfrage ausführen!!");
       $retObj = getTableToSQL("SELECT rowid,*,MAX(strftime('%s',created)) AS created_seconds FROM files;");
       $retObj = getNextID("files",120);
+      $retObj = getStringToOrtId(5);
     }
   }
 
