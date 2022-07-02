@@ -376,6 +376,15 @@
     return $path;
   }
   
+  function getLastInsertedRowID() {
+    global $db;
+    $sql = "SELECT LAST_INSERT_ROWID();";
+    if($res=$db->querySingle($sql)) {
+      return $res;
+    } 
+    return -1;
+  }
+  
   // get FileName from file - id
   function getFileNameFromFileID($id) {
     global $db;
@@ -605,7 +614,8 @@ EOF;
     $stmt->bindValue(':mimetype', mime_content_type($place), SQLITE3_TEXT);
     console_log("  Statement: ".htmlspecialchars($stmt->getSQL(true)));
     $result = $stmt->execute();
-    console_log("   Statement executed");
-    return 0;
+    $insertedid = getLastInsertedRowID();
+    console_log("   Statement executed - rowid: ".$insertedid);
+    return $insertedid;
   }
 ?>
