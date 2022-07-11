@@ -155,9 +155,11 @@
       }
     } else if (isset($_GET["test"])) { // hier haben wir eine Testabfrage zum ausprobieren
       debugTextOutput("Testabfrage ausführen!!");
-      $retObj = getTableToSQL("SELECT rowid,*,MAX(strftime('%s',created)) AS created_seconds FROM files;");
-      $retObj = getNextID("files",120);
-      $retObj = getStringToOrtId(5);
+      //$retObj = getTableToSQL("SELECT rowid,*,MAX(strftime('%s',created)) AS created_seconds FROM files;");
+      //$retObj = getNextID("files",120);
+      //$retObj = getStringToOrtId(5);
+      include("Bild_class.php");
+      debugTextOutput(json_encode(new Bild()));
     }
   }
 

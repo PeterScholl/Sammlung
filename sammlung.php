@@ -7,6 +7,7 @@
   error_reporting(E_ALL & ~E_NOTICE);
   
   require_once("config.php"); // konfiguration lesen
+  require_once("Bild_class.php");
 
   // Initialize the session
   session_start();
@@ -205,50 +206,8 @@ ul, #myUL {
         }
       } else if (isset($_POST['insertobj'])) { // objekt einfügen
         console_log_json($_FILES);
-        // name of the uploaded file
-        // checks from https://stackoverflow.com/questions/2021624/string-sanitizer-for-filename
-        $filename = preg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $_FILES['bildfile']['name']);
-        $filename = preg_replace("([\.]{2,})", '', $filename);
-        logdb("File uploaded: ".$filename);
-        console_log("File to upload: ".$filename);
-        // get the file extension
-        $extension = pathinfo($filename, PATHINFO_EXTENSION);
-        // the physical file on a temporary uploads directory on the server
-        $file = $_FILES['bildfile']['tmp_name'];
-        $size = $_FILES['bildfile']['size'];
-        // destination of the file on the server
-        $destination = UPLOADDIR.'/' . basename($file); //we keep the temporary name - original filename is stored in db
-        console_log("  tmp_name: ".$file);
-        console_log("  size: ".$size." - extension: ".$extension);
-        if ($_FILES['bildfile']['error']>0) {         // check on error
-          console_log("   ERROR - Error on upload - nr: ".$_FILES['bildfile']['error']. "- see https://www.php.net/manual/de/features.file-upload.errors.php for details");
-          $message_err = "Error - file too big or something else went wrong";
-        } elseif (!in_array($extension, ['jpg', 'gif', 'png'])) {
-          console_log("   ERROR - Wrong file extension");
-          $message_err = "Your file extension must be .jpg, .gif or .png";
-        } elseif ($_FILES['bildfile']['size'] > MAXUPLOADFILESIZE) { // file shouldn't be larger than defined in config.php
-          console_log("   ERROR - File too large > ".MAXUPLOADFILESIZE);
-          $message_err = "Your file is too large. Max: ".MAXUPLOADFILESIZE;
-        } else if (getNrOfUploadsInLastHour() > MAXUPLOADCOUNT) { // to many uploads
-          console_log("   ERROR - too many uploads".getNrOfUploadsInLastHour());
-          $message_err = "too many uploads in last hour";
-        } else {
-          console_log("  try to move uploaded file from ".htmlspecialchars($file)." to ".htmlspecialchars($destination));
-          // move the uploaded (temporary) file to the specified destination
-          // TODO: Check if file exists...
-          while(file_exists($destination) && strlen(basename($destination)) < 20) {
-            $destination=$destination."a";
-          }
-          if (move_uploaded_file($file, $destination)) {
-            console_log("   success");
-            $bildid=storeUploadedFileInDB($filename, $destination, $size);
-            $message_info="File ".htmlspecialchars($filename)." uploaded - has ID: ".$bildid;
-            
-          } else {
-            console_log("   failed");
-            $message_err="Failed to upload file.";
-          }
-        }
+        $b = Bild::generateBildFromUpload($_FILES['bildfile']);
+        console_log($b->$status." - ".$b->$errmsg);
       } else if (isset($_POST["edittheme"])) { //Thema soll editiert oder angelegt werden
         console_log("Thema anlegen - siehe post-Variablen");
         logdb("Thema anlegen...");
