@@ -70,7 +70,7 @@ EOF;
         }
       } else if (isset($_GET["checkFiles"])) { //hier soll die Konsistenz zwischen Dateien und Datenbank geprüft werden
         $show='checkFiles';
-      } else if (isset($_GET["wartung"])) { //Generate Thumbnails to all images
+      } else if (isset($_GET["wartung"])) { //Show Diaglogue "Wartung" 
         $show='wartung'; 
       } else if (isset($_GET["checkOrtOrder"])) { // Ort-order updaten
         checkOrtOrder();

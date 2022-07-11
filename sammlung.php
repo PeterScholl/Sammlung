@@ -208,6 +208,23 @@ ul, #myUL {
         console_log_json($_FILES);
         $b = Bild::generateBildFromUpload($_FILES['bildfile']);
         console_log($b->$status." - ".$b->$errmsg);
+        if ($b->$status == 0) { // everything went fine on generating the picture (Bild)
+          $temp_res = Bild::generateThumbnailToFileId($b->getDbID());
+          if ($temp_res->value<>0) {
+            console_log("ERROR on thumbnail generation: ".$temp_res->message);
+          }
+          $bez = filter_input(INPUT_POST,'bezeichnung',FILTER_SANITIZE_STRING);
+          // Bezeichnung mit Bild-ID in DB eintragen
+          if (insertUpdateObjekt($bez,0,$b->getDbID())<>0) {
+            console_log("ERROR on inserting objekt in DB");
+          }
+          // Wenn Anzahl UND Ort gesetzt ist
+          // - Verknüpfung von Anzahl und Ort eintragen
+          $message_info = "Object ".$bez." in DB eingetragen";
+        } else { // no bild could be generated
+          //TODO: Decide wether the object should be inserted without picture or nothing should be done
+          
+        }
       } else if (isset($_POST["edittheme"])) { //Thema soll editiert oder angelegt werden
         console_log("Thema anlegen - siehe post-Variablen");
         logdb("Thema anlegen...");
@@ -347,6 +364,11 @@ ul, #myUL {
                   echo "<a href=\"?changerow=".$row[0]."&table=".$name."\">".$row[0]."</a></td>\n";
                 } elseif ($_SESSION["zustand"] == Z_SHOWFILELIST && $res->columnName($i)=="name") {
                   echo "<a href=\"download.php?file=".$row[0]."\" target=\"_blank\">".$row[$i]."</a></td>\n";
+                } elseif ($_SESSION["zustand"] == Z_SHOWOBJEKTELIST && $res->columnName($i)=="bild") {
+                  $b = Bild::fetchBildFromDB($row[$i]);
+                  console_log_json($b->getThumbnail());
+                  console_log("image: ".$row[$i]." - Thumbnail: ".$b->getThumbnail()->getURL());
+                  echo "<img src=\"".$b->getThumbnail()->getURL()."\"></td>\n";
                 } else {
                   echo $row[$i]."</td>\n";
                 }

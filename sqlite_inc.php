@@ -326,7 +326,7 @@
     if ($rowid>0) { //edit objekt
       //TODO
     } else { // new objekt
-      if (strlen($bezeichnung)>0) {
+      if (!is_null($bezeichnung) and strlen($bezeichnung)>0) {
         logdb("generate new Objekt");
         //TODO check if superthema is integer and exists
         

@@ -9,6 +9,7 @@
   define("ADMINPASS", "pass"); //Passwort für Adminseite
   define("HOMEPAGE", "sammlung.php"); // Initial home-Page
   define("UPLOADDIR", "uploads"); //directory for uploads
+  define("THUMBNAILDIR", "thumbnails"); //directory for thumbnails
   
   //Funktionen für Log-auf die Konsole
   function console_log_json( $data ){
@@ -23,6 +24,21 @@
       echo '<script>';
       echo 'console.log("'. $data .'")';
       echo '</script>';
+    }
+  }
+  
+  //used by functions to return a Result
+  class Result {
+    public $value = 0; // 0 means no error
+    public $message = ""; // used to add information
+    
+    function __construct() {
+        $arguments = func_get_args();
+        $numberOfArguments = func_num_args();
+        if ($numberOfArguments == 2) {
+          $this->value = $arguments[0];
+          $this->message = $arguments[1];          
+        }
     }
   }
 

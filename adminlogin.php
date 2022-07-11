@@ -76,7 +76,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             </div>
             <div class="form-group">
                 <input type="submit" class="btn btn-primary" value="Login">
-                <a href="pirates.php" class="btn btn-primary">Home</a>
+                <a href="sammlung.php" class="btn btn-primary">Home</a>
             </div>
         </form>
     </div>
