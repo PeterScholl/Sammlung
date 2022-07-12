@@ -388,6 +388,7 @@ EOF;
         ?>
         <h4>Wartungsoptionen (Javascript)</h4>
         <button type="button" class="btn btn-primary" onclick="genThumbnailsWithLog(1)">Jetzt Thumbnails generieren</button>
+        <button type="button" class="btn btn-primary" onclick="genThumbnailsWithLog(1,true,true)">Force Thumbnails generieren</button>
         <button type="button" class="btn btn-primary" onclick="checkFilesWithLog(1,withMime=false)">Files pr&uuml;fen</button>
         <button type="button" class="btn btn-primary" onclick="checkFilesWithLog(1,withMime=true)">Files pr&uuml;fen - MimeType in DB generieren</button>
         <p id="wartungsoutput"></p>

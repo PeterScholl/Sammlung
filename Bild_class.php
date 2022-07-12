@@ -144,7 +144,7 @@ class Bild {
       $row = getSingleTableRow("files",$fileid);
       if ($row) { //result erhalten
         //TODO
-        $n_width = 200; //TODO default width of thumbnail
+        $n_height = 100; //TODO default height of thumbnail
         $add = $row['place'];
         $tsrc = THUMBNAILDIR."/".basename($add);
         if (!$force and file_exists($tsrc)) { //Thumbnail existiert schon
@@ -152,8 +152,8 @@ class Bild {
         } else if ($row['mimetype']=="image/gif"){
             $im=imagecreatefromgif($add);
             $width=ImageSx($im);              
-            $height=ImageSy($im);                  
-            $n_height=($n_width/$width) * $height; 
+            $height=ImageSy($im);
+            $n_width=($n_height/$height) * $width;
             $newimage=imagecreatetruecolor($n_width,$n_height);
             imageCopyResized($newimage,$im,0,0,0,0,$n_width,$n_height,$width,$height);
             if (function_exists("imagegif")){
@@ -170,7 +170,7 @@ class Bild {
             $im=imagecreatefromjpeg($add); 
             $width=ImageSx($im);              
             $height=ImageSy($im);         
-            $n_height=($n_width/$width) * $height;
+            $n_width=($n_height/$height) * $width;
             $newimage=imagecreatetruecolor($n_width,$n_height);                 
             imageCopyResized($newimage,$im,0,0,0,0,$n_width,$n_height,$width,$height);
             ImageJpeg($newimage,$tsrc);
@@ -183,7 +183,7 @@ class Bild {
             $im=imagecreatefrompng($add); 
             $width=ImageSx($im);              
             $height=ImageSy($im);             
-            $n_height=($n_width/$width) * $height;
+            $n_width=($n_height/$height) * $width;
             $newimage=imagecreatetruecolor($n_width,$n_height);                 
             imageCopyResized($newimage,$im,0,0,0,0,$n_width,$n_height,$width,$height);
             ImageJpeg($newimage,$tsrc);

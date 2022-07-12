@@ -44,9 +44,14 @@
     }
     if (isset($_GET["genThumbnail"]) and isset($_GET["fileid"])) { //hier Thumbnails generiert werden
       debugTextOutput("Generating thumbnail to fileid: ".$_GET["fileid"]);
+      logdb(json_encode($_GET));
       //$fileid = (int)$_GET["fileid"];
+      $force = false;
+      if (isset($_GET["force"])) {
+        $force = filter_input(INPUT_GET,'force',FILTER_VALIDATE_BOOLEAN);
+      }
       $fileid = intval(filter_input(INPUT_GET,'fileid',FILTER_SANITIZE_NUMBER_INT));
-      $result = Bild::generateThumbnailToFileId($fileid);
+      $result = Bild::generateThumbnailToFileId($fileid,$force=$force);
       if ($result->value == 0) { // worked
         $retObj->resultText = $result->message;
       } else {

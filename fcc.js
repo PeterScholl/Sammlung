@@ -25,10 +25,10 @@ function loadDocGet(url, cFunction) {
   xhttp.send();
 }
 
-function genThumbnailsWithLog(nr=1,recursive=true) {
+function genThumbnailsWithLog(nr=1,recursive=true,force=false) {
   var daten = {};
-  if (nr==1) $("#wartungsoutput").html("<br>Generating thumbnails<br>");  
-  loadDocGet("ajaxjsondata.php?genThumbnail=true&fileid="+nr, function(xhttp) {
+  if (nr==1) $("#wartungsoutput").html("<br>Generating thumbnails - force is: "+force+"<br>");  
+  loadDocGet("ajaxjsondata.php?genThumbnail=true&fileid="+nr+"&force="+force, function(xhttp) {
     //Daten erhalten
     daten = JSON.parse(xhttp.responseText);
     if (typeof daten.resultText !== 'undefined') {
@@ -40,7 +40,7 @@ function genThumbnailsWithLog(nr=1,recursive=true) {
     $("#wartungsoutput").append("NextID:"+daten.nextID+"<br>");
     console.log(JSON.stringify(daten));
     if (typeof daten.nextID !== 'undefined' && daten.nextID>0 && recursive) {
-      genThumbnailsWithLog(daten.nextID);
+      genThumbnailsWithLog(daten.nextID,recursive,force);
     } else {
       $("#wartungsoutput").append("Last file reached - generation DONE<br>");
     }
