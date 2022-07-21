@@ -172,6 +172,28 @@
     }
   }
   
+  // Objekte für die komplexe Objektdarstellung zurückliefern - als array
+  function getObjekte($offset, $limit, $mitOrt=false, $mitDokument=false) {
+    // is used in ajax - so no debug output allowed
+    if (!is_numeric($offset) or $offset<0) $offset=0;
+    if (!is_numeric($limit) or $limit<0 or $limit>50) $limit=20;
+    global $db;
+    $stmt = $db->prepare('SELECT rowid,* FROM objekt ORDER BY sort,rowid ASC LIMIT :limit OFFSET :offset');
+    $stmt->bindValue(':limit', $limit, SQLITE3_INTEGER);
+    $stmt->bindValue(':offset', $offset, SQLITE3_INTEGER);
+    //console_log("Query: ".htmlspecialchars($stmt->getSQL(true)));
+    $result = $stmt->execute();
+    $retobj = array();
+    while ($row = $result->fetchArray()) {
+      array_push($retobj, $row);
+    }
+    //TODO: check wether there is no result and offset <> 0 then set offset to 0
+    if (empty($retobj) and $offset>0) return getObjekte(0,$limit,$mitOrt,$mitDokument);
+    $page = ceil($offset/$limit);
+    $retobj['page']=$page;
+    return $retobj;
+  }
+  
   //rekursiv Themenliste ausgeben
   function printThemenListeAsUL($id, $tiefe = 0) {
     //check if $id is Integer

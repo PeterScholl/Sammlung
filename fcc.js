@@ -71,6 +71,54 @@ function checkFilesWithLog(nr=1,withMime=false, recursive=true) {
   console.log("FileCheck - done: "+nr);
 }
 
+//the following function is used to fill the table with desired output
+// in the complex Objekt-view
+function fillObjektTable() {
+  console.log("-- in fill ObjektTable --");
+  var table = document.getElementById("tableOfObjekte");
+  //Delete table rows
+  //probably better to delete all children of tbody?!
+  while (table.rows.length>1) {
+    table.deleteRow(1);
+  }
+  var tablebody = document.getElementById("tableOfObjekteBody");
+  while (tablebody.firstChild) {
+    tablebody.removeChild(tablebody.lastChild);
+  }
+  //populate the table
+  var offset = 20; // get from form
+  var limit = 10; // get from form
+  var mitOrt = false; //
+  var mitDokument = false; //
+  var daten = {};
+  console.log("Try to fetch "+"ajaxjsondata.php?getObjektData&limit="+limit+"&offset="+offset+"&mitOrt="+mitOrt+"&mitDoc="+mitDokument);
+  loadDocGet("ajaxjsondata.php?getObjektData&limit="+limit+"&offset="+offset+"&mitOrt="+mitOrt+"&mitDoc="+mitDokument, function(xhttp) {
+    //Daten erhalten
+    daten = JSON.parse(xhttp.responseText);
+    var pagenr = daten['page'];
+    delete daten.page; //page entfernen jetzt sollten nur noch Daten vorhanden sein
+    var keys = Object.keys(daten);
+    if ((typeof daten !== 'undefined') && (keys.length > 0)) {
+      console.log("Daten is defined and has length: "+keys.length);
+      console.log("And the keys are: "+JSON.stringify(keys));
+      for (let i = 0; i<keys.length; i++) {
+        var row = tablebody.insertRow();
+        console.log("-"+i+"-"+keys[i]+": "+JSON.stringify(daten[keys[i]]));
+        row.insertCell(0).innerHTML = daten[keys[i]]['rowid'];
+        row.insertCell(1).innerHTML = daten[keys[i]]['bezeichnung'];
+        row.insertCell(2).innerHTML = daten[keys[i]][2];
+        row.insertCell(3).innerHTML = daten[keys[i]][3];
+        row.insertCell(4).innerHTML = daten[keys[i]][4];
+        row.insertCell(5).innerHTML = daten[keys[i]]['sort'];
+        row.insertCell(6).innerHTML = daten[keys[i]]['created'];
+        row.insertCell(6).innerHTML = daten[keys[i]]['edited'];
+        
+      }
+    }
+    console.log(JSON.stringify(daten));
+  })
+}
+
 function insertEditObjekt() {
   var daten = {};
   //Daten aus der Form holen
@@ -211,6 +259,24 @@ function hideAddForm() {
   document.getElementById('btnHideAdd').style.display='none';  
 }
 
+function showHideBlockElementById(id, do_show) {
+    var stl;
+    if (do_show) stl = 'block'
+    else         stl = 'none';
+
+    var element  = document.getElementById(id);
+    element.style.display=stl;  
+}
+
+//taken from https://www.wikihow.com/Toggle-HTML-Display-With-JavaScript
+function toggleContentDisplayById(id) {
+  // Get the DOM reference
+  var contentId = document.getElementById(id);
+  // Toggle 
+  contentId.style.display == "block" ? contentId.style.display = "none" : 
+contentId.style.display = "block"; 
+}
+
 //Code for Countdown on Closing window 
 //Time gets printed in a tag with id "CountDownTime"
 var stp;
@@ -237,6 +303,22 @@ function CountDownTimer(id) {
     countdownFrom--
 }
 
+// taken and modified from https://stackoverflow.com/questions/7754013/hiding-columns-in-table-javascript
+function show_hide_column(col_no, do_show) {
+
+    var stl;
+    if (do_show) stl = 'block'
+    else         stl = 'none';
+
+    var tbl  = document.getElementById('id_of_table');
+    var rows = tbl.getElementsByTagName('tr');
+
+    for (var row=1; row<rows.length;row++) {
+      var cels = rows[row].getElementsByTagName('td')
+      cels[col_no].style.display=stl;
+    }
+  }
+
 function lettersNumbersCheck(name)
 {
    var regEx = /^[0-9a-zA-Z\-\_\.]+$/;
@@ -259,4 +341,27 @@ function setRowDeleteModal(rowid, table) {
   document.getElementById("confirmRowDeleteBtn").setAttribute('onclick','location.href="?delrow='+rowid+'&table='+table+'"');
 }
 
+//Cookies
+function setCookie(cname, cvalue, exdays) {
+  const d = new Date();
+  d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+  let expires = "expires="+d.toUTCString();
+  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+//to check if a cookie is set: getCookie("cookiename") != ""
+function getCookie(cname) {
+  let name = cname + "=";
+  let ca = document.cookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
 

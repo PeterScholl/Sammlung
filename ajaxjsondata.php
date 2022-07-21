@@ -105,6 +105,16 @@
       } else {
         $retObj->resultText = "failed";
       }
+    } else if (isset($_GET["getObjektData"])) { // Daten holen für die Objektdarstellung
+      // Optionen mit Orten, Limits, Filter müssen irgendwie eingebaut werden
+      $limit = filter_input(INPUT_GET,'limit',FILTER_SANITIZE_NUMBER_INT);
+      if ($limit < 5 or $limit > 50) {$limit = 20;}
+      $offset = filter_input(INPUT_GET,'offset',FILTER_SANITIZE_NUMBER_INT);
+      $mitOrt = filter_input(INPUT_GET,'mitOrt',FILTER_VALIDATE_BOOLEAN);
+      $mitDokument = filter_input(INPUT_GET,'mitDoc',FILTER_VALIDATE_BOOLEAN);
+      debugTextOutput("Limit: ".$limit." mitOrt: ".$mitOrt." mitDokument: ".$mitDokument. " offset: ".$offset);
+      $retObj=getObjekte($offset, $limit, $mitOrt, $mitDokument);
+      
     } else if (isset($_GET["test"])) { // hier haben wir eine Testabfrage zum ausprobieren
       debugTextOutput("Testabfrage ausführen!!");
       //$retObj = getTableToSQL("SELECT rowid,*,MAX(strftime('%s',created)) AS created_seconds FROM files;");

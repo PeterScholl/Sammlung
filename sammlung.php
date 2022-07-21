@@ -78,6 +78,7 @@ ul, #myUL {
     // Zustände
     define("Z_SHOWTHEMEN",2);  //Themenübersicht anzeigen
     define("Z_SHOWOBJEKTELIST",1);
+    define("Z_SHOWSIMPLEOBJEKTELIST",8); //Einfache Objekteliste
     define("Z_SHOWORTE",7);  //Orte anzeigen
     define("Z_UPLOADDIALOGUE",3); //show upload dialogue
     define("Z_SHOWFILELIST",4);
@@ -111,6 +112,9 @@ ul, #myUL {
         } else if($_GET["show"]==="objekte") {
           console_log("Objekte werden angezeigt");
           $_SESSION["zustand"] = Z_SHOWOBJEKTELIST;
+        } else if($_GET["show"]==="objekteSimple") {
+          console_log("Objekte werden als einfache Tabelle angezeigt");
+          $_SESSION["zustand"] = Z_SHOWSIMPLEOBJEKTELIST;
         } else if($_GET["show"]==="upload") {
           console_log("Uploaddialogue is shown");
           $_SESSION["zustand"] = Z_UPLOADDIALOGUE;
@@ -274,7 +278,7 @@ ul, #myUL {
     
 ?>
 
-<body>
+<body onload="fillObjektTable()">
 <nav class="navbar navbar-expand-sm bg-dark navbar-dark fixed-top">
   <div class="collapse navbar-collapse" id="collapsibleNavbar">
     <ul class="navbar-nav">
@@ -291,6 +295,7 @@ ul, #myUL {
           <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=orte">Orte</a>
           <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=objekte">Objekte</a>
           <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=files">Files</a>
+          <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=objekteSimple">Objekte (einfach)</a>
         </div>
       </li>
       <!-- Dropdown Aktionen -->
@@ -345,13 +350,13 @@ ul, #myUL {
       <?php
       // alle Zustände, bei denen keine spezielle Tabelle angezeigt werden muss
       // Evtl. treeview ala https://www.w3schools.com/howto/howto_js_treeview.asp
-      if ($_SESSION["zustand"] == Z_SHOWOBJEKTELIST || $_SESSION["zustand"] == Z_SHOWFILELIST) {
+      if ($_SESSION["zustand"] == Z_SHOWSIMPLEOBJEKTELIST || $_SESSION["zustand"] == Z_SHOWFILELIST) {
         switch($_SESSION["zustand"]) {
           case Z_SHOWFILELIST:
             echo '<h5 id="tblname">Files</h5>';
             $name = "files";
             break;
-          case Z_SHOWOBJEKTELIST:
+          case Z_SHOWSIMPLEOBJEKTELIST:
           default:
             echo '<h5 id="tblname">Objekt&uuml;bersicht</h5>';
             $name = "objekt";
@@ -387,6 +392,113 @@ ul, #myUL {
             }
           echo "</tbody></table></div>\n";
         }
+      } else if ($_SESSION["zustand"] == Z_SHOWOBJEKTELIST) {
+        if (!isset($_SESSION["limitPerPage"]) || !is_int($_SESSION["limitPerPage"]) || $_SESSION["limitPerPage"] > 50) {
+          $_SESSION["limitPerPage"]=20;
+        }
+        //Objektübersicht
+        ?>
+        <div class="mb-2">
+          <h5>Objekt&uuml;bersicht</h5>
+          <button type="button" class="btn btn-primary btn-sm" onclick="toggleContentDisplayById('ObjekteFilter')">Filter</button>
+          <button type="button" class="btn btn-primary btn-sm" onclick="toggleContentDisplayById('ObjekteAnsicht')">Ansicht</button>
+        </div>
+        <?php
+        //Menü für Filter
+        ?>
+        <div id="ObjekteFilter" style="display:none">
+          Hier kommt die Form um den Filter anzupassen
+        </div>
+        <?php
+        //Menü für Ansicht
+        ?>
+        <div id="ObjekteAnsicht" style="display:none">
+          <div class="row gy-2 gx-3 align-items-center">
+            <div class="col-auto">
+              <div class="form-outline">
+                <label class="form-label">Spalten ausw&auml;hlen</label>
+              </div>
+            </div>
+            <div class="col-auto">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteID" checked />
+                <label class="form-check-label" for="ObjekteSpalteID"> ID </label>
+              </div>
+            </div>
+            <div class="col-auto">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteBezeichnung" checked />
+                <label class="form-check-label" for="ObjekteSpalteBezeichnung"> Bezeichnung </label>
+              </div>
+            </div>
+            <div class="col-auto">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteBild" checked />
+                <label class="form-check-label" for="ObjekteSpalteBild"> Bild </label>
+              </div>
+            </div>
+            <div class="col-auto">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteOrte" checked />
+                <label class="form-check-label" for="ObjekteSpalteOrte"> Orte </label>
+              </div>
+            </div>
+            <div class="col-auto">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteDokumente" checked />
+                <label class="form-check-label" for="ObjekteSpalteDokumente"> Dokumente </label>
+              </div>
+            </div>
+            <div class="col-auto">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteSortID" checked />
+                <label class="form-check-label" for="ObjekteSpalteSortID"> SortID </label>
+              </div>
+            </div>
+            <div class="col-auto">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpaltecreated" />
+                <label class="form-check-label" for="ObjekteSpaltecreated"> created </label>
+              </div>
+            </div>
+            <div class="col-auto">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteedited" />
+                <label class="form-check-label" for="ObjekteSpalteedited"> edited </label>
+              </div>
+            </div>
+             	 	
+          </div>
+        </div>
+        <?php
+        //hier die eigentliche Tabelle aufbauen
+        ?>
+        <div class="table-responsive">
+          <table class="table" id="tableOfObjekte">
+            <thead><tr>
+              <th>ID</th>
+              <th>Bezeichnung</th>
+              <th>Bild</th>
+              <th>Ort(e)</th>
+              <th>Dokumente</th>
+              <th>SortID</th>
+              <th>created</th>
+              <th>edited</th>
+            </tr></thead>
+            <tbody id="tableOfObjekteBody">
+              <tr><td>1</td></tr>
+              <tr><td>2</td></tr>
+              <tr><td>3</td></tr>
+              <tr><td>4</td></tr>
+              <tr><td>5</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <?php
+        
+        //nach Aufbau der Seite durch Javascript und AjaxJsonData auffüllen lassen
+        // z.B. mit <table onload="fillObjektTable()">
+
       } else if ($_SESSION["zustand"] ==Z_SHOWTHEMEN) {
         // Zustand Themen anzeigen
         echo '<h5 id="tblname">Themen&uuml;bersicht</h5>';
