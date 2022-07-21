@@ -100,12 +100,10 @@
       $ort = (int)$_GET["ortid"]; // numeric
       $bild = (int)$_GET["bildid"]; //number
       debugTextOutput("Insert or Edit Objekt");
-      if (is_integer($anz)) {
-        if (insertUpdateObjekt($bez,$anz,$bild)>=0) {
-          $retObj->resultText = "done";
-        } else {
-          $retObj->resultText = "failed";
-        }
+      if (insertUpdateObjekt($bez,$bild)>=0) {
+        $retObj->resultText = "done";
+      } else {
+        $retObj->resultText = "failed";
       }
     } else if (isset($_GET["test"])) { // hier haben wir eine Testabfrage zum ausprobieren
       debugTextOutput("Testabfrage ausführen!!");

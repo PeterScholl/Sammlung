@@ -123,9 +123,12 @@
       if (array_key_exists($col,$data)) { //zu diesem key gibt es Daten
         $strcol=$strcol.$col.",";
         $strval=$strval."'".$data[$col]."',";
+      } else if ($col=='created' or $col=='edited') {
+        $strcol=$strcol.$col.",";
+        $strval=$strval." strftime(\"%Y-%m-%d %H:%M:%S\",\"now\"),";
       }
     }
-    console_log("strval:".$strval);
+    console_log("strval:".htmlspecialchars($strval));
     if (strlen($strcol)>0) {
       $sql = "INSERT INTO ".$table." (".substr($strcol,0,-1).") VALUES (".substr($strval,0,-1).");";
       console_log("Zeile wird eingetragen: ".htmlspecialchars($sql));
@@ -317,22 +320,18 @@
         $lastsup=$row['superort'];
         console_log_json($depthlist);
       }
-      echo "<option value=\"".$row['rowid'].($row['rowid']==$_SESSION['aktort']?" selected":"")."\">".$pre.$row['bezeichnung']."</option>";
+      echo "<option value=\"".$row['rowid']."\"".($row['rowid']==$_SESSION['aktort']?" selected":"").">".$pre.$row['bezeichnung']."</option>";
     }
   }
   
-  function insertUpdateObjekt($bezeichnung, $anzahl, $bild, $rowid=-1) {
+  function insertUpdateObjekt($bezeichnung, $bild, $rowid=-1) {
     global $db;
     if ($rowid>0) { //edit objekt
       //TODO
     } else { // new objekt
       if (!is_null($bezeichnung) and strlen($bezeichnung)>0) {
-        logdb("generate new Objekt");
-        //TODO check if superthema is integer and exists
-        
-        $stmt = $db->prepare('INSERT INTO objekt (bezeichnung,anzahl,bild,created,edited) VALUES (:bez, :anz, :bild, strftime("%Y-%m-%d %H:%M:%S","now"),strftime("%Y-%m-%d %H:%M:%S","now"));');
+        $stmt = $db->prepare('INSERT INTO objekt (bezeichnung,bild,created,edited) VALUES (:bez, :bild, strftime("%Y-%m-%d %H:%M:%S","now"),strftime("%Y-%m-%d %H:%M:%S","now"));');
         $stmt->bindValue(':bez', $bezeichnung, SQLITE3_TEXT);
-        $stmt->bindValue(':anz', $anzahl, SQLITE3_INTEGER);
         $stmt->bindValue(':bild', $bild, SQLITE3_INTEGER);
         logdb("  Statement to execute: ".htmlspecialchars($stmt->getSQL(true)));
         $stmt->execute();
@@ -341,7 +340,7 @@
         return -1;
       }
     }
-    return 0;
+    return getLastInsertedRowID();
   }
 
   // get number of uploaded files during last hour
@@ -531,7 +530,7 @@ EOF;
        }
     }
     // Objekt
-    checkTableExists("objekt","CREATE TABLE objekt (bezeichnung TEXT, anzahl INTEGER DEFAULT 1, bild TEXT DEFAULT NULL, sort INTEGER, created TEXT, edited TEXT);");
+    checkTableExists("objekt","CREATE TABLE objekt (bezeichnung TEXT, bild TEXT DEFAULT NULL, sort INTEGER, created TEXT, edited TEXT);");
     // Ort
     checkTableExists("ort","CREATE TABLE ort (bezeichnung TEXT, superort INTEGER DEFAULT -1, sort INTEGER, created TEXT, edited TEXT);");
     // ObjektIstAmOrt

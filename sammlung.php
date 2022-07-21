@@ -159,7 +159,7 @@ ul, #myUL {
     if($_SERVER["REQUEST_METHOD"] == "POST") {
       console_log("Server-requestmethod ist POST");
       console_log_json($_POST);
-      if (isset($_POST['save'])) { // if save button on the form is clicked
+      if (isset($_POST['save'])) { // if save button on the File-Upload-form is clicked
         // name of the uploaded file
         // checks from https://stackoverflow.com/questions/2021624/string-sanitizer-for-filename
         $filename = preg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $_FILES['myfile']['name']);
@@ -205,7 +205,7 @@ ul, #myUL {
           }
         }
       } else if (isset($_POST['insertobj'])) { // objekt einfügen
-        console_log_json($_FILES);
+        console_log_json($_POST);
         $b = Bild::generateBildFromUpload($_FILES['bildfile']);
         console_log($b->$status." - ".$b->$errmsg);
         if ($b->$status == 0) { // everything went fine on generating the picture (Bild)
@@ -215,12 +215,22 @@ ul, #myUL {
           }
           $bez = filter_input(INPUT_POST,'bezeichnung',FILTER_SANITIZE_STRING);
           // Bezeichnung mit Bild-ID in DB eintragen
-          if (insertUpdateObjekt($bez,0,$b->getDbID())<>0) {
+          $objid = insertUpdateObjekt($bez,$b->getDbID());
+          if ($objid < 0) {
             console_log("ERROR on inserting objekt in DB");
-          }
-          // Wenn Anzahl UND Ort gesetzt ist
-          // - Verknüpfung von Anzahl und Ort eintragen
-          $message_info = "Object ".$bez." in DB eingetragen";
+            $message_err = "Object ".$bez." konnte nicht in DB eingetragen werden";
+          } else {
+            $message_info = "Object ".$bez." in DB eingetragen";
+            // Wenn Anzahl UND Ort gesetzt ist
+            if (isset($_POST['ort'])) {
+              $_SESSION['aktort']=intval(filter_input(INPUT_POST,'ort',FILTER_SANITIZE_NUMBER_INT));
+            }
+            // - Verknüpfung von Anzahl und Ort eintragen
+            if (isset($_POST['anzahl']) and filter_input(INPUT_POST,'anzahl',FILTER_SANITIZE_NUMBER_INT) > 0 and filter_input(INPUT_POST,'ort',FILTER_SANITIZE_NUMBER_INT)>=0) {
+              addTableRow("objektAnOrt", array("objektID" =>$objid, "ortID"=>filter_input(INPUT_POST,'ort',FILTER_SANITIZE_NUMBER_INT), "anzahl"=>filter_input(INPUT_POST,'anzahl',FILTER_SANITIZE_NUMBER_INT)));
+              $message_info = "Object ".$bez." mit Anzahl und Ort in DB eingetragen";
+            }
+          }           
         } else { // no bild could be generated
           //TODO: Decide wether the object should be inserted without picture or nothing should be done
           
