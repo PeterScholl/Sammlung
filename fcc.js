@@ -88,7 +88,7 @@ function fillObjektTable() {
   //populate the table
   var offset = 20; // get from form
   var limit = 10; // get from form
-  var mitOrt = false; //
+  var mitOrt = true; //
   var mitDokument = false; //
   var daten = {};
   console.log("Try to fetch "+"ajaxjsondata.php?getObjektData&limit="+limit+"&offset="+offset+"&mitOrt="+mitOrt+"&mitDoc="+mitDokument);
@@ -106,8 +106,15 @@ function fillObjektTable() {
         console.log("-"+i+"-"+keys[i]+": "+JSON.stringify(daten[keys[i]]));
         row.insertCell(0).innerHTML = daten[keys[i]]['rowid'];
         row.insertCell(1).innerHTML = daten[keys[i]]['bezeichnung'];
-        row.insertCell(2).innerHTML = daten[keys[i]][2];
-        row.insertCell(3).innerHTML = daten[keys[i]][3];
+        row.insertCell(2).innerHTML = daten[keys[i]]['bild'];
+        //Orte
+        var ortekeys = Object.keys(daten[keys[i]]['orte']);
+        var ortetext = "";
+        for (let j = 0; j<ortekeys.length; j++) {
+          //TODO ortid in Text umwandeln - vielleicht kann das aber auch das ajax schon machen
+          ortetext+=daten[keys[i]]['orte'][ortekeys[j]][1]+"("+daten[keys[i]]['orte'][ortekeys[j]][0]+")<br>";
+        }
+        row.insertCell(3).innerHTML = ortetext;
         row.insertCell(4).innerHTML = daten[keys[i]][4];
         row.insertCell(5).innerHTML = daten[keys[i]]['sort'];
         row.insertCell(6).innerHTML = daten[keys[i]]['created'];

@@ -184,7 +184,16 @@
     //console_log("Query: ".htmlspecialchars($stmt->getSQL(true)));
     $result = $stmt->execute();
     $retobj = array();
-    while ($row = $result->fetchArray()) {
+    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+      //auf verknüpfte Orte prüfen
+      $orte = getTableAsArray("objektAnOrt",$where='objektID='.$row['rowid']);
+      $ortearray = [];
+      if ($mitOrt && !empty($orte)) {
+         foreach($orte as $x => $xvalue) {
+           $ortearray[$xvalue['ortID']]=array( $xvalue['anzahl'], getStringToOrtId($xvalue['ortID']) );
+         }
+      }
+      $row['orte']=$ortearray;
       array_push($retobj, $row);
     }
     //TODO: check wether there is no result and offset <> 0 then set offset to 0
