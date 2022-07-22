@@ -173,7 +173,7 @@
   }
   
   // Objekte für die komplexe Objektdarstellung zurückliefern - als array
-  function getObjekte($offset, $limit, $mitOrt=false, $mitDokument=false) {
+  function getObjekte($offset, $limit, $mitOrt=false, $mitDokument=false,$mitBild=false) {
     // is used in ajax - so no debug output allowed
     if (!is_numeric($offset) or $offset<0) $offset=0;
     if (!is_numeric($limit) or $limit<0 or $limit>50) $limit=20;
@@ -198,11 +198,15 @@
       $row['orte']=$ortearray;
       //$row['bild'] mit richtigem Path füllen
       //TODO: Falls kein Bild empty.jpg einbauen
-      $row['bild']=str_replace(UPLOADDIR,THUMBNAILDIR,$db->querySingle("select place from files where rowid=".$row['bild']));
+      if ($mitBild) {
+        $row['bild']=str_replace(UPLOADDIR,THUMBNAILDIR,$db->querySingle("select place from files where rowid=".$row['bild']));
+      } else {
+        $row['bild']=THUMBNAILDIR."\empty.jpg";
+      }
       array_push($retobj, $row);
     }
     //TODO: check wether there is no result and offset <> 0 then set offset to 0
-    if (empty($retobj) and $offset>0) return getObjekte(0,$limit,$mitOrt,$mitDokument);
+    if (empty($retobj) and $offset>0) return getObjekte(0,$limit,$mitOrt,$mitDokument,$mitBild);
     $retobj['page']=ceil(($offset+1)/$limit); //current page number
     $retobj['numpages']=ceil($anzObjekte/$limit); // number of pages
     return $retobj;

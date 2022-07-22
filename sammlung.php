@@ -402,6 +402,7 @@ ul, #myUL {
           <h5>Objekt&uuml;bersicht</h5>
           <button type="button" class="btn btn-primary btn-sm" onclick="toggleContentDisplayById('ObjekteFilter')">Filter</button>
           <button type="button" class="btn btn-primary btn-sm" onclick="toggleContentDisplayById('ObjekteAnsicht')">Ansicht</button>
+          <button type="button" class="btn btn-primary btn-sm" onclick="fillObjektTable(parseInt(document.getElementById('actpage').innerHTML))">Reload</button>
         </div>
         <?php
         //Menü für Filter
@@ -413,6 +414,7 @@ ul, #myUL {
         //Menü für Ansicht
         ?>
         <div id="ObjekteAnsicht" style="display:none">
+          <input type="hidden" id="numpages" value="">
           <div class="row gy-2 gx-3 align-items-center">
             <div class="col-auto">
               <div class="form-outline">
@@ -500,6 +502,7 @@ ul, #myUL {
         <div id="ObjekteNavigation">
           <a href="">&lt;&lt;</a>
           <a href="">&lt;</a>
+          <span id="actpage">1</span>
           <a href="">&gt;</a>
           <a href="">&gt;&gt;</a>
         </div>

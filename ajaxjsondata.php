@@ -112,8 +112,9 @@
       $offset = filter_input(INPUT_GET,'offset',FILTER_SANITIZE_NUMBER_INT);
       $mitOrt = filter_input(INPUT_GET,'mitOrt',FILTER_VALIDATE_BOOLEAN);
       $mitDokument = filter_input(INPUT_GET,'mitDoc',FILTER_VALIDATE_BOOLEAN);
+      $mitBild = filter_input(INPUT_GET,'mitBild',FILTER_VALIDATE_BOOLEAN);
       debugTextOutput("Limit: ".$limit." mitOrt: ".$mitOrt." mitDokument: ".$mitDokument. " offset: ".$offset);
-      $retObj=getObjekte($offset, $limit, $mitOrt, $mitDokument);
+      $retObj=getObjekte($offset, $limit, $mitOrt, $mitDokument,$mitBild);
       
     } else if (isset($_GET["test"])) { // hier haben wir eine Testabfrage zum ausprobieren
       debugTextOutput("Testabfrage ausführen!!");

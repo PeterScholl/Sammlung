@@ -188,37 +188,54 @@ function fillObjektTable(page=1) {
         
       }
       // Fill the navigation division
-      var navigation = document.getElementById("ObjekteNavigation");
-      //Delete table rows
-      while (navigation.firstChild) {
-        navigation.removeChild(navigation.lastChild);
-      }
-      // Add back to page 1 link
-      var l = document.createElement("a");
-      l.href = "Javascript:fillObjektTable(1)";
-      l.innerHTML ="<<";
-      navigation.appendChild(l);
-      navigation.appendChild(document.createTextNode(" "));
-      // Add back one page link
-      l = document.createElement("a");
-      l.href = "Javascript:fillObjektTable("+(pagenr-1)+")";
-      l.innerHTML ="<";
-      navigation.appendChild(l);
-      navigation.appendChild(document.createTextNode(" "));
-      // Add Page Nr.
-      navigation.appendChild(document.createTextNode(""+pagenr+" "));
-      // Add go on one page link
-      l = document.createElement("a");
-      l.href = "Javascript:fillObjektTable("+(pagenr+1)+")";
-      l.innerHTML =">";
-      navigation.appendChild(l);
-      navigation.appendChild(document.createTextNode(" "));
-      // Add go to last page link
-      l = document.createElement("a");
-      l.href = "Javascript:fillObjektTable("+(pagecount)+")";
-      l.innerHTML =">>";
-      navigation.appendChild(l);
-
+        var navigation = document.getElementById("ObjekteNavigation");
+        //Delete table rows
+        while (navigation.firstChild) {
+          navigation.removeChild(navigation.lastChild);
+        }
+        // Add back to page 1 link
+        var l;
+        if (pagenr>1) {
+          l = document.createElement("a");
+          l.href = "Javascript:fillObjektTable(1)";
+          l.innerHTML ="<<";
+          navigation.appendChild(l);
+          navigation.appendChild(document.createTextNode(" "));
+        }
+        // Add back one page link
+        if (pagenr>2) {
+          l = document.createElement("a");
+          l.href = "Javascript:fillObjektTable("+(pagenr-1)+")";
+          l.innerHTML ="<";
+          navigation.appendChild(l);
+        }
+        // Add Page Nr.
+        navigation.appendChild(document.createTextNode(" Seite "));
+        l = document.createElement("span");
+        l.id="actpage";
+        l.innerHTML=pagenr;
+        navigation.appendChild(l);
+        navigation.appendChild(document.createTextNode(" von "));
+        l = document.createElement("span");
+        l.id="numpages";
+        l.innerHTML=pagecount;
+        navigation.appendChild(l);
+        navigation.appendChild(document.createTextNode(" "));
+        // Add go on one page link
+        if (pagenr<(pagecount-1)) {
+          l = document.createElement("a");
+          l.href = "Javascript:fillObjektTable("+(pagenr+1)+")";
+          l.innerHTML =">";
+          navigation.appendChild(l);
+          navigation.appendChild(document.createTextNode(" "));
+        }
+        // Add go to last page link
+        if (pagenr<pagecount) {
+          l = document.createElement("a");
+          l.href = "Javascript:fillObjektTable("+(pagecount)+")";
+          l.innerHTML =">>";
+          navigation.appendChild(l);
+        }
     }
     console.log(JSON.stringify(daten));
   })
