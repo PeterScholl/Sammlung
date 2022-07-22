@@ -407,70 +407,75 @@ ul, #myUL {
         <?php
         //Menü für Filter
         ?>
-        <div id="ObjekteFilter" style="display:none">
-          Hier kommt die Form um den Filter anzupassen
+        <div id="ObjekteFilter" style="display:none" class="mb-2 mt-2">
+          <div class="row align-items-center">
+            <div class="col-auto input-group">
+              <label for="objekteFilter" class="mr-2">Filterstring (SQL-Like):</label>
+              <input type="text" class="form-inline" id="objekteFilter" size="15" name="objekteFilter" placeholder="%search_" onKeyUp="this.value=this.value.replace(/[^a-zA-Z0-9%_äöüÄÖÜß]/g, '');">
+            </div>
+          </div>
         </div>
         <?php
         //Menü für Ansicht
         ?>
-        <div id="ObjekteAnsicht" style="display:none">
+        <div id="ObjekteAnsicht" style="display:none" class="mb-2">
           <input type="hidden" id="numpages" value="">
-          <div class="row gy-2 gx-3 align-items-center">
-            <div class="col-auto">
+          <div class="row row-cols-12 align-items-center">
+            <div class="col-2">
               <div class="form-outline">
                 <label class="form-label">Spalten ausw&auml;hlen</label>
               </div>
             </div>
-            <div class="col-auto">
+            <div class="col">
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteID" onchange="setCookie('mitID',this.checked,100);" <?php echo (filter_input(INPUT_COOKIE,'mitID',FILTER_VALIDATE_BOOLEAN) || !isset($_COOKIES['mitID']))?"checked":"";?> />
                 <label class="form-check-label" for="ObjekteSpalteID"> ID </label>
               </div>
             </div>
-            <div class="col-auto">
+            <div class="col">
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteBezeichnung" onchange="setCookie('mitBez',this.checked,100);" <?php echo (filter_input(INPUT_COOKIE,'mitBez',FILTER_VALIDATE_BOOLEAN) || !isset($_COOKIES['mitBez']))?"checked":"";?> />
                 <label class="form-check-label" for="ObjekteSpalteBezeichnung"> Bezeichnung </label>
               </div>
             </div>
-            <div class="col-auto">
+            <div class="col">
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteBild" onchange="setCookie('mitBild',this.checked,100);" <?php echo (filter_input(INPUT_COOKIE,'mitBild',FILTER_VALIDATE_BOOLEAN))?"checked":"";?> />
                 <label class="form-check-label" for="ObjekteSpalteBild"> Bild </label>
               </div>
             </div>
-            <div class="col-auto">
+            <div class="col">
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteOrte" onchange="setCookie('mitOrt',this.checked,100);" <?php echo (filter_input(INPUT_COOKIE,'mitOrt',FILTER_VALIDATE_BOOLEAN))?"checked":"";?> />
                 <label class="form-check-label" for="ObjekteSpalteOrte"> Orte </label>
               </div>
             </div>
-            <div class="col-auto">
+            <div class="col">
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteDokumente" onchange="setCookie('mitDokument',this.checked,100);" <?php echo (filter_input(INPUT_COOKIE,'mitDokument',FILTER_VALIDATE_BOOLEAN))?"checked":"";?> />
                 <label class="form-check-label" for="ObjekteSpalteDokumente"> Dokumente </label>
               </div>
             </div>
-            <div class="col-auto">
+            <div class="col">
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteSortID" onchange="setCookie('mitSort',this.checked,100);" <?php echo (filter_input(INPUT_COOKIE,'mitSort',FILTER_VALIDATE_BOOLEAN))?"checked":"";?> />
                 <label class="form-check-label" for="ObjekteSpalteSortID"> SortID </label>
               </div>
             </div>
-            <div class="col-auto">
+            <div class="col">
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" value="" id="ObjekteSpaltecreated" onchange="setCookie('mitCrtd',this.checked,100);" <?php echo (filter_input(INPUT_COOKIE,'mitCrtd',FILTER_VALIDATE_BOOLEAN))?"checked":"";?>/>
                 <label class="form-check-label" for="ObjekteSpaltecreated"> created </label>
               </div>
             </div>
-            <div class="col-auto">
+            <div class="col">
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteedited" onchange="setCookie('mitEdit',this.checked,100);" <?php echo (filter_input(INPUT_COOKIE,'mitEdit',FILTER_VALIDATE_BOOLEAN))?"checked":"";?>/>
                 <label class="form-check-label" for="ObjekteSpalteedited"> edited </label>
               </div>
             </div>
-            <div class="col-auto">
-              <label for="limit" class="mr-2">Limit: </label>
+            <div class="col-2 input-group">
+              <label for="limit" class="mr-2">Limit:</label>
               <input type="number" class="form-inline" id="limit" size="3" name="username" value="10" min="5" max="50">
             </div>
           </div>

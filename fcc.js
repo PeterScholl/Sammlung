@@ -94,6 +94,9 @@ function fillObjektTable(page=1) {
   var mitDokument = document.getElementById("ObjekteSpalteDokumente").checked;
   var limit = parseInt(document.getElementById("limit").value);
   var offset = (page-1)*limit;
+  // get Filter-values from form
+  var filterStr = document.getElementById("objekteFilter").value;
+  console.log("FilterString: "+filterStr+" isValid: "+/^([a-z0-9A-Z%_ÄÖÜäöüß]*)$/.test(filterStr));
   //generate Table Head
   var tablehead = document.getElementById("tableOfObjekteHead");
   while (tablehead.firstChild) { tablehead.removeChild(tablehead.lastChild); }
