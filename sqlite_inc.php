@@ -196,6 +196,9 @@
          }
       }
       $row['orte']=$ortearray;
+      //$row['bild'] mit richtigem Path füllen
+      //TODO: Falls kein Bild empty.jpg einbauen
+      $row['bild']=str_replace(UPLOADDIR,THUMBNAILDIR,$db->querySingle("select place from files where rowid=".$row['bild']));
       array_push($retobj, $row);
     }
     //TODO: check wether there is no result and offset <> 0 then set offset to 0

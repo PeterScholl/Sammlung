@@ -79,17 +79,73 @@ function fillObjektTable(page=1) {
   //Delete table rows
   //probably better to delete all children of tbody?!
   var tablebody = document.getElementById("tableOfObjekteBody");
+  if (tablebody === null) return;
   while (tablebody.firstChild) {
     tablebody.removeChild(tablebody.lastChild);
   }
-  //populate the table
-  var limit = 10; // get from form
+  // get Ansicht(View)-values from form
+  var mitID = document.getElementById("ObjekteSpalteID").checked;
+  var mitBez = document.getElementById("ObjekteSpalteBezeichnung").checked;
+  var mitBild = document.getElementById("ObjekteSpalteBild").checked;
+  var mitSort = document.getElementById("ObjekteSpalteSortID").checked;
+  var mitCrtd = document.getElementById("ObjekteSpaltecreated").checked;
+  var mitEdit = document.getElementById("ObjekteSpalteedited").checked;
+  var mitOrt = document.getElementById("ObjekteSpalteOrte").checked;
+  var mitDokument = document.getElementById("ObjekteSpalteDokumente").checked;
+  var limit = parseInt(document.getElementById("limit").value);
   var offset = (page-1)*limit;
-  var mitOrt = true; //
-  var mitDokument = false; //
+  //generate Table Head
+  var tablehead = document.getElementById("tableOfObjekteHead");
+  while (tablehead.firstChild) { tablehead.removeChild(tablehead.lastChild); }
+  var h = document.createElement("th");
+  h.innerText="ID";
+  if (!mitID) {
+    h.style="display:none;";
+  }
+  tablehead.appendChild(h);
+  h = document.createElement("th");
+  h.innerText="Bezeichnung";
+  if (!mitBez) {
+    h.style="display:none;";
+  }
+  tablehead.appendChild(h);
+  if (mitBild) {
+    h = document.createElement("th");
+    h.innerText="Bild";
+    tablehead.appendChild(h);
+  }
+  if (mitOrt) {
+    h = document.createElement("th");
+    h.innerText="Ort(e)";
+    tablehead.appendChild(h);
+  }
+  if (mitDokument) {
+    h = document.createElement("th");
+    h.innerText="Dokumente";
+    tablehead.appendChild(h);
+  }
+  if (mitSort) {
+    h = document.createElement("th");
+    h.innerText="SortID";
+    tablehead.appendChild(h);
+  }
+  if (mitCrtd) {
+    h = document.createElement("th");
+    h.innerText="created";
+    tablehead.appendChild(h);
+  }
+  if (mitEdit) {
+    h = document.createElement("th");
+    h.innerText="edited";
+    tablehead.appendChild(h);
+  }
+
+  //populate the table
   var daten = {};
-  console.log("Try to fetch "+"ajaxjsondata.php?getObjektData&limit="+limit+"&offset="+offset+"&mitOrt="+mitOrt+"&mitDoc="+mitDokument);
-  loadDocGet("ajaxjsondata.php?getObjektData&limit="+limit+"&offset="+offset+"&mitOrt="+mitOrt+"&mitDoc="+mitDokument, function(xhttp) {
+  console.log("Try to fetch "+"ajaxjsondata.php?getObjektData&limit="+limit+"&offset="+offset+"&mitOrt="+mitOrt+"&mitDoc="+mitDokument+"&mitBild="+mitBild+"&mitSort="+mitSort
+      +"&mitCrtd="+mitCrtd+"&mitEdit="+mitEdit);
+  loadDocGet("ajaxjsondata.php?getObjektData&limit="+limit+"&offset="+offset+"&mitOrt="+mitOrt+"&mitDoc="+mitDokument+"&mitBild="+mitBild+"&mitSort="+mitSort
+      +"&mitCrtd="+mitCrtd+"&mitEdit="+mitEdit, function(xhttp) {
     //Daten erhalten
     daten = JSON.parse(xhttp.responseText);
     var pagenr = parseInt(daten['page']);
@@ -103,21 +159,32 @@ function fillObjektTable(page=1) {
       for (let i = 0; i<keys.length; i++) {
         var row = tablebody.insertRow();
         console.log("-"+i+"-"+keys[i]+": "+JSON.stringify(daten[keys[i]]));
-        row.insertCell(0).innerHTML = daten[keys[i]]['rowid'];
-        row.insertCell(1).innerHTML = daten[keys[i]]['bezeichnung'];
-        row.insertCell(2).innerHTML = daten[keys[i]]['bild'];
-        //Orte
-        var ortekeys = Object.keys(daten[keys[i]]['orte']);
-        var ortetext = "";
-        for (let j = 0; j<ortekeys.length; j++) {
-          //TODO ortid in Text umwandeln - vielleicht kann das aber auch das ajax schon machen
-          ortetext+=daten[keys[i]]['orte'][ortekeys[j]][1]+"("+daten[keys[i]]['orte'][ortekeys[j]][0]+")<br>";
+        var cell = row.insertCell(0);
+        cell.innerHTML = daten[keys[i]]['rowid'];
+        if (!mitID) cell.style="display:none;";
+        cell = row.insertCell(1);
+        cell.innerHTML = daten[keys[i]]['bezeichnung'];
+        if (!mitBez) cell.style="display:none;";
+        if (mitBild) {
+          var image = document.createElement("img");
+          image.src = daten[keys[i]]['bild'];
+          row.insertCell(-1).appendChild(image);
+          //row.insertCell(2).innerHTML = daten[keys[i]]['bild'];
         }
-        row.insertCell(3).innerHTML = ortetext;
-        row.insertCell(4).innerHTML = daten[keys[i]][4];
-        row.insertCell(5).innerHTML = daten[keys[i]]['sort'];
-        row.insertCell(6).innerHTML = daten[keys[i]]['created'];
-        row.insertCell(6).innerHTML = daten[keys[i]]['edited'];
+        if (mitOrt)  {
+          //Orte
+          var ortekeys = Object.keys(daten[keys[i]]['orte']);
+          var ortetext = "";
+          for (let j = 0; j<ortekeys.length; j++) {
+            //TODO ortid in Text umwandeln - vielleicht kann das aber auch das ajax schon machen
+            ortetext+=daten[keys[i]]['orte'][ortekeys[j]][1]+"("+daten[keys[i]]['orte'][ortekeys[j]][0]+")<br>";
+          }
+          row.insertCell(-1).innerHTML = ortetext;
+        }
+        if (mitDokument) row.insertCell(-1).innerHTML = daten[keys[i]][4];
+        if (mitSort) row.insertCell(-1).innerHTML = daten[keys[i]]['sort'];
+        if (mitCrtd) row.insertCell(-1).innerHTML = daten[keys[i]]['created'];
+        if (mitEdit) row.insertCell(-1).innerHTML = daten[keys[i]]['edited'];
         
       }
       // Fill the navigation division
@@ -384,7 +451,7 @@ function setCookie(cname, cvalue, exdays) {
   const d = new Date();
   d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
   let expires = "expires="+d.toUTCString();
-  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/"+";SameSite=Lax";
 }
 
 //to check if a cookie is set: getCookie("cookiename") != ""
@@ -401,5 +468,14 @@ function getCookie(cname) {
     }
   }
   return "";
+}
+
+function mytest(event) {
+  if (typeof event !=='undefined' && typeof event.checked !== 'undefined' && event.checked) {
+    console.log("Checked");
+  } else {
+    console.log("INPUT was: "+JSON.stringify(event));
+  }
+  console.log(JSON.stringify(document.cookie));
 }
 

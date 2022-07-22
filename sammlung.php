@@ -379,7 +379,7 @@ ul, #myUL {
                   echo "<a href=\"?changerow=".$row[0]."&table=".$name."\">".$row[0]."</a></td>\n";
                 } elseif ($_SESSION["zustand"] == Z_SHOWFILELIST && $res->columnName($i)=="name") {
                   echo "<a href=\"download.php?file=".$row[0]."\" target=\"_blank\">".$row[$i]."</a></td>\n";
-                } elseif ($_SESSION["zustand"] == Z_SHOWOBJEKTELIST && $res->columnName($i)=="bild") {
+                } elseif ($_SESSION["zustand"] == Z_SHOWSIMPLEOBJEKTELIST && $res->columnName($i)=="bild") {
                   $b = Bild::fetchBildFromDB($row[$i]);
                   console_log_json($b->getThumbnail());
                   console_log("image: ".$row[$i]." - Thumbnail: ".$b->getThumbnail()->getURL());
@@ -421,49 +421,49 @@ ul, #myUL {
             </div>
             <div class="col-auto">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteID" checked />
+                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteID" onchange="setCookie('mitID',this.checked,100);" <?php echo (filter_input(INPUT_COOKIE,'mitID',FILTER_VALIDATE_BOOLEAN) || !isset($_COOKIES['mitID']))?"checked":"";?> />
                 <label class="form-check-label" for="ObjekteSpalteID"> ID </label>
               </div>
             </div>
             <div class="col-auto">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteBezeichnung" checked />
+                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteBezeichnung" onchange="setCookie('mitBez',this.checked,100);" <?php echo (filter_input(INPUT_COOKIE,'mitBez',FILTER_VALIDATE_BOOLEAN) || !isset($_COOKIES['mitBez']))?"checked":"";?> />
                 <label class="form-check-label" for="ObjekteSpalteBezeichnung"> Bezeichnung </label>
               </div>
             </div>
             <div class="col-auto">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteBild" checked />
+                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteBild" onchange="setCookie('mitBild',this.checked,100);" <?php echo (filter_input(INPUT_COOKIE,'mitBild',FILTER_VALIDATE_BOOLEAN))?"checked":"";?> />
                 <label class="form-check-label" for="ObjekteSpalteBild"> Bild </label>
               </div>
             </div>
             <div class="col-auto">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteOrte" checked />
+                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteOrte" onchange="setCookie('mitOrt',this.checked,100);" <?php echo (filter_input(INPUT_COOKIE,'mitOrt',FILTER_VALIDATE_BOOLEAN))?"checked":"";?> />
                 <label class="form-check-label" for="ObjekteSpalteOrte"> Orte </label>
               </div>
             </div>
             <div class="col-auto">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteDokumente" checked />
+                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteDokumente" onchange="setCookie('mitDokument',this.checked,100);" <?php echo (filter_input(INPUT_COOKIE,'mitDokument',FILTER_VALIDATE_BOOLEAN))?"checked":"";?> />
                 <label class="form-check-label" for="ObjekteSpalteDokumente"> Dokumente </label>
               </div>
             </div>
             <div class="col-auto">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteSortID" checked />
+                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteSortID" onchange="setCookie('mitSort',this.checked,100);" <?php echo (filter_input(INPUT_COOKIE,'mitSort',FILTER_VALIDATE_BOOLEAN))?"checked":"";?> />
                 <label class="form-check-label" for="ObjekteSpalteSortID"> SortID </label>
               </div>
             </div>
             <div class="col-auto">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpaltecreated" />
+                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpaltecreated" onchange="setCookie('mitCrtd',this.checked,100);" <?php echo (filter_input(INPUT_COOKIE,'mitCrtd',FILTER_VALIDATE_BOOLEAN))?"checked":"";?>/>
                 <label class="form-check-label" for="ObjekteSpaltecreated"> created </label>
               </div>
             </div>
             <div class="col-auto">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteedited" />
+                <input class="form-check-input" type="checkbox" value="" id="ObjekteSpalteedited" onchange="setCookie('mitEdit',this.checked,100);" <?php echo (filter_input(INPUT_COOKIE,'mitEdit',FILTER_VALIDATE_BOOLEAN))?"checked":"";?>/>
                 <label class="form-check-label" for="ObjekteSpalteedited"> edited </label>
               </div>
             </div>
@@ -478,7 +478,7 @@ ul, #myUL {
         ?>
         <div class="table-responsive">
           <table class="table" id="tableOfObjekte">
-            <thead><tr>
+            <thead id="tableOfObjekteHead"><tr>
               <th>ID</th>
               <th>Bezeichnung</th>
               <th>Bild</th>
