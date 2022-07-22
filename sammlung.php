@@ -467,7 +467,10 @@ ul, #myUL {
                 <label class="form-check-label" for="ObjekteSpalteedited"> edited </label>
               </div>
             </div>
-             	 	
+            <div class="col-auto">
+              <label for="limit" class="mr-2">Limit: </label>
+              <input type="number" class="form-inline" id="limit" size="3" name="username" value="10" min="5" max="50">
+            </div>
           </div>
         </div>
         <?php
@@ -493,6 +496,12 @@ ul, #myUL {
               <tr><td>5</td></tr>
             </tbody>
           </table>
+        </div>
+        <div id="ObjekteNavigation">
+          <a href="">&lt;&lt;</a>
+          <a href="">&lt;</a>
+          <a href="">&gt;</a>
+          <a href="">&gt;&gt;</a>
         </div>
         <?php
         

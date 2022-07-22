@@ -178,6 +178,8 @@
     if (!is_numeric($offset) or $offset<0) $offset=0;
     if (!is_numeric($limit) or $limit<0 or $limit>50) $limit=20;
     global $db;
+    $sql = "select count() from objekt;";
+    $anzObjekte=$db->querySingle($sql); // TODO: check wether result is ok
     $stmt = $db->prepare('SELECT rowid,* FROM objekt ORDER BY sort,rowid ASC LIMIT :limit OFFSET :offset');
     $stmt->bindValue(':limit', $limit, SQLITE3_INTEGER);
     $stmt->bindValue(':offset', $offset, SQLITE3_INTEGER);
@@ -198,8 +200,8 @@
     }
     //TODO: check wether there is no result and offset <> 0 then set offset to 0
     if (empty($retobj) and $offset>0) return getObjekte(0,$limit,$mitOrt,$mitDokument);
-    $page = ceil($offset/$limit);
-    $retobj['page']=$page;
+    $retobj['page']=ceil(($offset+1)/$limit); //current page number
+    $retobj['numpages']=ceil($anzObjekte/$limit); // number of pages
     return $retobj;
   }
   

@@ -73,21 +73,18 @@ function checkFilesWithLog(nr=1,withMime=false, recursive=true) {
 
 //the following function is used to fill the table with desired output
 // in the complex Objekt-view
-function fillObjektTable() {
+function fillObjektTable(page=1) {
   console.log("-- in fill ObjektTable --");
   var table = document.getElementById("tableOfObjekte");
   //Delete table rows
   //probably better to delete all children of tbody?!
-  while (table.rows.length>1) {
-    table.deleteRow(1);
-  }
   var tablebody = document.getElementById("tableOfObjekteBody");
   while (tablebody.firstChild) {
     tablebody.removeChild(tablebody.lastChild);
   }
   //populate the table
-  var offset = 20; // get from form
   var limit = 10; // get from form
+  var offset = (page-1)*limit;
   var mitOrt = true; //
   var mitDokument = false; //
   var daten = {};
@@ -95,8 +92,10 @@ function fillObjektTable() {
   loadDocGet("ajaxjsondata.php?getObjektData&limit="+limit+"&offset="+offset+"&mitOrt="+mitOrt+"&mitDoc="+mitDokument, function(xhttp) {
     //Daten erhalten
     daten = JSON.parse(xhttp.responseText);
-    var pagenr = daten['page'];
+    var pagenr = parseInt(daten['page']);
+    var pagecount = parseInt(daten['numpages']);
     delete daten.page; //page entfernen jetzt sollten nur noch Daten vorhanden sein
+    delete daten.numpages; // numpages - dito
     var keys = Object.keys(daten);
     if ((typeof daten !== 'undefined') && (keys.length > 0)) {
       console.log("Daten is defined and has length: "+keys.length);
@@ -121,6 +120,38 @@ function fillObjektTable() {
         row.insertCell(6).innerHTML = daten[keys[i]]['edited'];
         
       }
+      // Fill the navigation division
+      var navigation = document.getElementById("ObjekteNavigation");
+      //Delete table rows
+      while (navigation.firstChild) {
+        navigation.removeChild(navigation.lastChild);
+      }
+      // Add back to page 1 link
+      var l = document.createElement("a");
+      l.href = "Javascript:fillObjektTable(1)";
+      l.innerHTML ="<<";
+      navigation.appendChild(l);
+      navigation.appendChild(document.createTextNode(" "));
+      // Add back one page link
+      l = document.createElement("a");
+      l.href = "Javascript:fillObjektTable("+(pagenr-1)+")";
+      l.innerHTML ="<";
+      navigation.appendChild(l);
+      navigation.appendChild(document.createTextNode(" "));
+      // Add Page Nr.
+      navigation.appendChild(document.createTextNode(""+pagenr+" "));
+      // Add go on one page link
+      l = document.createElement("a");
+      l.href = "Javascript:fillObjektTable("+(pagenr+1)+")";
+      l.innerHTML =">";
+      navigation.appendChild(l);
+      navigation.appendChild(document.createTextNode(" "));
+      // Add go to last page link
+      l = document.createElement("a");
+      l.href = "Javascript:fillObjektTable("+(pagecount)+")";
+      l.innerHTML =">>";
+      navigation.appendChild(l);
+
     }
     console.log(JSON.stringify(daten));
   })
