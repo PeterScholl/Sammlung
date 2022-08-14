@@ -7,7 +7,7 @@
   //TODO-Fehler abfangen
   class MyDB extends SQLite3 {
     function __construct() {
-       $this->open('sammlung.db');
+      $this->open('sammlung.db');
     }
   }
   $db = new MyDB();

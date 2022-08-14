@@ -97,6 +97,7 @@ function fillObjektTable(page=1) {
   // get Filter-values from form
   var filterStr = document.getElementById("objekteFilter").value;
   console.log("FilterString: "+filterStr+" isValid: "+/^([a-z0-9A-Z%_ÄÖÜäöüß]*)$/.test(filterStr));
+  if (!/^([a-z0-9A-Z%_ÄÖÜäöüß]*)$/.test(filterStr)) filterStr='';
   //generate Table Head
   var tablehead = document.getElementById("tableOfObjekteHead");
   while (tablehead.firstChild) { tablehead.removeChild(tablehead.lastChild); }
