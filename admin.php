@@ -74,7 +74,12 @@ EOF;
         $show='wartung'; 
       } else if (isset($_GET["checkOrtOrder"])) { // Ort-order updaten
         checkOrtOrder();
-        $show='tables';
+        $result="Sorting of Orte is checked";
+        $show='wartung';
+      } else if (isset($_GET["checkMissingSuperOrte"])) { //Missing superorte durch -1 ersetzen
+        checkMissingSuperOrt();
+        $result="Missing Superorte are checked";
+        $show='wartung';
       }
       if (isset($_GET["delrow"])) { //hier soll eine Tabellenzeile gelöscht werden
         $rowid = filter_input(INPUT_GET, 'delrow', FILTER_VALIDATE_INT);
@@ -394,6 +399,7 @@ EOF;
         <p id="wartungsoutput"></p>
         <h4>Wartungsoptionen (php-Links)</h4>
         <a href="?checkOrtOrder">Pr&uuml;fe Sortierung in Tabelle Orte</a>
+        <a href="?checkMissingSuperOrte">Pr&uuml;fe ob bei allen Orten die Superorte vorhanden sind</a>
         <?php
       }
     ?>

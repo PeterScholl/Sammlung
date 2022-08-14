@@ -265,11 +265,16 @@
           if ($db->querySingle($sql)) {
             //yes there are subitems
             echo "<li><span class=\"caret\">".$row["bezeichnung"]."</span>";
+            echo "<a onclick=\"setRowDeleteModal('".$row["rowid"]."','ort');document.getElementById('confirmRowDelete').style.display='block'\" class=\"text-danger\" role=\"button\">&times;</a>";
+            echo "<a href=\"?show=editOrt&ortid=".$row['rowid']."\">&#9998;</a>";
             printOrteListeAsUL($row["rowid"], $tiefe=$tiefe+1);
             echo "</li>";
           } else {
             //there are no subitems
-            echo "<li>".$row["bezeichnung"]."</li>";
+            echo "<li>".$row["bezeichnung"];
+            echo "<a onclick=\"setRowDeleteModal('".$row["rowid"]."','ort');document.getElementById('confirmRowDelete').style.display='block'\" class=\"text-danger\" role=\"button\">&times;</a>";
+            echo "<a href=\"?show=editOrt&ortid=".$row['rowid']."\">&#9998;</a>";
+            echo "</li>";
           }
         }
         echo "</UL>";
@@ -289,8 +294,11 @@
     } else { // new theme
       if (strlen($bezeichnung)>0) {
         logdb("New Theme anlegen");
-        //TODO check if superthema is integer and exists
-        
+        //check if superthema is integer and exists
+        $stmt = $db->prepare('Select bezeichnung from themen where rowid=:superthema');
+        $stmt->bindValue(':superthema', $superthema, SQLITE3_INTEGER);
+        if (!$stmt->execute()) $superthema=-1;
+       
         $stmt = $db->prepare('INSERT INTO themen (bezeichnung,superthema,created,edited) VALUES (:bez, :st, strftime("%Y-%m-%d %H:%M:%S","now"),strftime("%Y-%m-%d %H:%M:%S","now"));');
         $stmt->bindValue(':bez', $bezeichnung, SQLITE3_TEXT);
         $stmt->bindValue(':st', $superthema, SQLITE3_INTEGER);
@@ -304,6 +312,60 @@
     return 0;
   }
 
+  function insertUpdateOrt($bezeichnung, $superort, $rowid=-1) {
+    global $db;
+    if ($rowid>0) { //edit ort
+      $stmt = $db->prepare('UPDATE ort SET bezeichnung=:bez, superort=:sup WHERE rowid=:id');
+      $stmt->bindValue(':bez', $bezeichnung, SQLITE3_TEXT);
+      $stmt->bindValue(':sup', $superort, SQLITE3_INTEGER);
+      $stmt->bindValue(':id', $rowid, SQLITE3_INTEGER);
+      console_log("  Statement to execute: ".htmlspecialchars($stmt->getSQL(true)));
+      if ($stmt->execute()) {
+        return 0;
+      } else {
+        return -1;
+      }
+    } else { // new theme
+      if (strlen($bezeichnung)>0) {
+        logdb("generate new Ort");
+        //check if superort is integer and exists
+        $stmt = $db->prepare('Select bezeichnung from ort where rowid=:superort');
+        $stmt->bindValue(':superort', $superort, SQLITE3_INTEGER);
+        if (!$stmt->execute()) $superort=-1;
+        $stmt = $db->prepare('INSERT INTO ort (bezeichnung,superort,created,edited) VALUES (:bez, :st, strftime("%Y-%m-%d %H:%M:%S","now"),strftime("%Y-%m-%d %H:%M:%S","now"));');
+        $stmt->bindValue(':bez', $bezeichnung, SQLITE3_TEXT);
+        $stmt->bindValue(':st', $superort, SQLITE3_INTEGER);
+        console_log("  Statement to execute: ".htmlspecialchars($stmt->getSQL(true)));
+        $stmt->execute();
+      } else { // String has length 0
+        logdb("New Ort has length 0");
+        return -1;
+      }
+    }
+    return 0;
+  }
+
+  function deleteOrt($rowid=-1) {
+    global $db;
+    $stmt = $db->prepare('SELECT superort FROM ort WHERE rowid=:id');
+    $stmt->bindValue(':id', $rowid, SQLITE3_INTEGER);
+    if ($result = $stmt->execute()) {
+      //we got a result - there is something to delete
+      $line = $result->fetchArray(SQLITE3_ASSOC);
+      $newsuperort = -1;
+      if ($line['superort']>0) {
+        $newsuperort = $line['superort']; //Superort of element to delete gets superort of children
+      }
+      $stmt = $db->prepare('UPDATE ort SET superort=:sup WHERE superort=:oldsup');
+      $stmt->bindValue(':sup', $newsuperort, SQLITE3_INTEGER);
+      $stmt->bindValue(':oldsup',$rowid, SQLITE3_INTEGER);
+      $stmt->execute();
+      delTableRow("ort",$rowid);
+      return 0;
+    }
+    return -1; // there was no Ort
+  }
+  
   function getStringToOrtId($id) {
     if ($id==-1) return "";
     global $db;
@@ -337,6 +399,12 @@
       
     }
     return $nextval;
+  }
+  
+  function checkMissingSuperOrt() {
+    global $db;
+    $db->query('UPDATE ort AS A set superort=-1 where not exists ( SELECT 1 FROM ort AS B where A.superort=B.rowid )'); 
+    
   }
   
   function printOrteAsSelection() {

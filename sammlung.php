@@ -83,6 +83,7 @@ ul, #myUL {
     define("Z_UPLOADDIALOGUE",3); //show upload dialogue
     define("Z_SHOWFILELIST",4);
     define("Z_EDITTHEME",5); //edit or add themes
+    define("Z_EDITORT",9); //edit or add Ort
     define("Z_INSERTOBJ",6); //insert Obj themes
     if (!isset($_SESSION["zustand"])) {
       $_SESSION["zustand"] = Z_SHOWTHEMEN;
@@ -124,6 +125,9 @@ ul, #myUL {
         } else if($_GET["show"]==="edittheme") {
           console_log("Theme should be edited or added");
           $_SESSION["zustand"] = Z_EDITTHEME;  
+        } else if($_GET["show"]==="editOrt") {
+          console_log("Theme should be edited or added");
+          $_SESSION["zustand"] = Z_EDITORT;  
         } else if($_GET["show"]==="insertObj") {
           console_log("Object should be added");
           $_SESSION["zustand"] = Z_INSERTOBJ;  
@@ -139,10 +143,12 @@ ul, #myUL {
       if (isset($_GET["delrow"])) { //hier soll eine Tabellenzeile gelöscht werden
         $rowid = filter_input(INPUT_GET, 'delrow', FILTER_VALIDATE_INT);
         $tablename = trim(filter_input(INPUT_GET, 'table', FILTER_SANITIZE_STRING));
-        //TODO: prüfen ob angemeldet
+        //prüfen ob angemeldet
         //TODO: prüfen ob Benutzer berechtigt ist
-        if ($tablename==="files") {
-          console_log("  ein File soll gelöscht werden - noch TODO");
+        if ($_SESSION["user"]<0) {
+          $message_err="Deletion only allowed to users";
+        } else if ($tablename==="files") {
+          console_log("  ein File soll gelöscht werden");
           
           if (unlink(getFilePathFromFileID($rowid))) {
             logdb("Fileid ".$rowid." - path: ".getFilePathFromFileID($rowid)." deleted");
@@ -151,6 +157,9 @@ ul, #myUL {
             $message_err="Could not delete file....";
             logdb("ERROR Fileid ".$rowid." - path: ".getFilePathFromFileID($rowid)." could not be deleted");
           }  
+        } else if ($tablename==="ort") {
+          console_log("  ein Ort soll gelöscht werden");
+          deleteOrt($rowid);
         } else {
           $message_err="Deletion not implemented or not possible";
           logdb(" Deletion of row ".$rowid." from table ".$tablename." not allowed or not possible");
@@ -244,11 +253,35 @@ ul, #myUL {
         logdb("Thema anlegen...");
         if (isset($_POST["editid"]) && intval($_POST["editid"])>0) {
           console_log("Theme should be edited: ".filter_input(INPUT_POST,'editid',FILTER_VALIDATE_INT));
+          //TODO: Code is missing
         } else {
           console_log("New theme");
           // check if bezeichnung and superthema are valid
           if (insertUpdateTheme(filter_input(INPUT_POST,'bezeichnung',FILTER_SANITIZE_STRING), filter_input(INPUT_POST,'supertheme',FILTER_VALIDATE_INT))<0) {
             $message_err="Thema konnte nicht erstellt werden";
+          } else {
+            $message_info="Thema ".filter_input(INPUT_POST,'bezeichnung',FILTER_SANITIZE_STRING)." wurde angelegt";
+          }
+        }        
+      } else if (isset($_POST["editort"])) { //Ort soll editiert oder angelegt werden
+        console_log("Ort anlegen oder editieren - siehe post-Variablen");
+        logdb("Ort anlegen...");
+        if (isset($_POST["editid"]) && intval($_POST["editid"])>0) {
+          console_log("Ort should be edited: ".filter_input(INPUT_POST,'editid',FILTER_VALIDATE_INT));
+          if (insertUpdateOrt(filter_input(INPUT_POST,'bezeichnung',FILTER_SANITIZE_STRING), 
+              filter_input(INPUT_POST,'superort',FILTER_VALIDATE_INT),
+              $rowid=filter_input(INPUT_POST,'editid',FILTER_VALIDATE_INT))<0) {
+            $message_err="Ort konnte nicht aktualisiert werden werden";
+          } else {
+            $message_info="Ort ".filter_input(INPUT_POST,'bezeichnung',FILTER_SANITIZE_STRING)." wurde aktualisiert";
+          }
+        } else {
+          console_log("New Ort");
+          // check if bezeichnung and superort are valid
+          if (insertUpdateOrt(filter_input(INPUT_POST,'bezeichnung',FILTER_SANITIZE_STRING), filter_input(INPUT_POST,'superort',FILTER_VALIDATE_INT))<0) {
+            $message_err="Ort konnte nicht erstellt werden";
+          } else {
+            $message_info="Ort ".filter_input(INPUT_POST,'bezeichnung',FILTER_SANITIZE_STRING)." wurde angelegt";
           }
         }        
       } else if (isset($_POST["logout"])) { //Benutzer soll abgemeldet werden
@@ -306,6 +339,7 @@ ul, #myUL {
         <div class="dropdown-menu">
           <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=upload">Upload</a>
           <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=edittheme">Thema anlegen</a>
+          <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=editOrt">Ort anlegen</a>
           <a class="dropdown-item" href="<?php echo HOMEPAGE;?>?show=insertObj">Objekt anlegen</a>
         </div>
       </li>
@@ -618,6 +652,61 @@ ul, #myUL {
             </div>
             <div class="form-row mt-2">
               <button type="submit" class="btn btn-primary" id="edittheme" name="edittheme">Submit</button>
+            </div>
+          </form>
+        </div>
+        <?php
+      } else if ($_SESSION["zustand"] == Z_EDITORT) {
+        // ORT editieren oder anlegen
+        $superort="Keiner";
+        if (isset($_GET["ortid"])) { 
+          //ort soll editiert werden
+          $editid = intval($_GET["ortid"]);
+          echo '<h5>Ort editieren - ID '.$editid.'</h5>';
+          $zeile = getSingleTableRow("ort",$editid);
+          //console_log("Edit Ort: ".htmlspecialchars(json_encode($zeile)));
+          $wert=htmlspecialchars($zeile["bezeichnung"]);
+          //console_log("Edit Ort - bezeichnung: ".$bezvorgabe);
+          if ($zeile["superort"]!=-1) {
+            $zeile = getSingleTableRow("ort",intval($zeile["superort"]));
+            $superort=htmlspecialchars($zeile["bezeichnung"]);
+            $superortId=intval($zeile["rowid"]);
+            //console_log("Superort: ".$superort." mit ID: ".$superortId);
+          } 
+        } else {
+          echo '<h5>Ort anlegen</h5>';
+          $bezvorgabe="&lt;Neuer Ort&gt;";
+          $superortId=-1;
+        }
+        //console_log("before print - superortID=".$superortId." - is integer: ".is_int($superortId));
+        ?>
+        <div id="EditOrAddOrt" class="form-group">
+          <form class="form" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+            <?php echo '<input type="hidden" name="editid" value="'.$editid.'">'; ?>
+            <div class="form-row">
+              <label for="supertheme" class="mt-2 mb-0">Über-Ort</label>
+              <select class="form-control" placeholder="<?php echo $superort; ?>" id="superort" name="superort">
+                <option value="-1">Keiner</option>
+                <?php
+                $array = getTableToSQL("SELECT rowid,bezeichnung FROM ort ORDER BY sort ASC");
+                for ($i = 0; $i < count($array); $i++) {
+                  echo '<option value="'.$array[$i]["rowid"].'"'.($array[$i]["rowid"]==$superortId?' selected="selected"':'').'>'.htmlspecialchars($array[$i]["bezeichnung"]).'</option>'."\n";
+                }
+                ?>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="bezeichnung" class="mt-2 mb-0">Bezeichnung</label>
+              <?php
+              if (isset($wert)) {
+                echo "<input type=\"text\" class=\"form-control\" value=\"".$wert."\" name=\"bezeichnung\">";
+              } else {
+                echo "<input type=\"text\" class=\"form-control\" placeholder=\"".$bezvorgabe."\" name=\"bezeichnung\">";
+              }
+              ?>
+            </div>
+            <div class="form-row mt-2">
+              <button type="submit" class="btn btn-primary" id="editort" name="editort">Submit</button>
             </div>
           </form>
         </div>
