@@ -1,7 +1,10 @@
 ##### my special files
 sqlite.php
 ERROR.LOG
-sammlung.db
+*.db
+thumbnails/
+uploads/
+temp/
 
 ##### Windows
 # Windows thumbnail cache files
